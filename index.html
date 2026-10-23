@@ -408,6 +408,8 @@ const T={
   tartan:tex(cnv(512,(g,S)=>drawTartan(g,S,{base:'#9e1f2b',bands:[[.0,.18,'rgba(20,40,30,.55)'],[.45,.05,'rgba(240,225,200,.7)'],[.7,.1,'rgba(10,10,10,.35)']]})),.5),
   tartanG:tex(cnv(512,(g,S)=>drawTartan(g,S,{base:'#4b5e4a',bands:[[.0,.2,'rgba(20,20,20,.35)'],[.5,.05,'rgba(230,200,140,.6)'],[.72,.08,'rgba(120,30,30,.5)']]})),.5),
   knit:tex(cnv(512,(g,S)=>drawKnit(g,S,{c:'#e9e1d2'})),.6),
+  hemlock:tex(cnv(512,(g,S)=>drawBoards(g,S,{meters:1.2,widths:[.09,.09],base:[24,40,66],vary:6,seed:61,gap:'rgba(120,70,40,.28)',gapw:.003})),1.2),
+  abachi:tex(cnv(512,(g,S)=>drawBoards(g,S,{meters:1.2,widths:[.09,.09],base:[44,40,82],vary:4,seed:62,gap:'rgba(150,120,80,.15)',gapw:.002})),1.2),
   oakRaw:tex(cnv(512,(g,S)=>drawBoards(g,S,{meters:1.2,widths:[.13,.17,.11],base:[35,32,63],vary:6,seed:23,gap:'rgba(110,85,55,.14)',gapw:.003})),1.2),
   oak:tex(cnv(512,(g,S)=>drawBoards(g,S,{meters:1.2,widths:[.12,.16,.1],base:[34,38,63],vary:6,seed:21,gap:'rgba(90,60,30,.18)',gapw:.003})),1.2),
   oldOak:tex(cnv(512,(g,S)=>drawBoards(g,S,{meters:1.2,widths:[.14,.16],base:[33,26,58],vary:10,seed:44,knots:true,ends:true,gap:'rgba(60,40,22,.6)',gapw:.006})),1.2),
@@ -435,7 +437,7 @@ mat('larchExtH',{map:T.larchExtH,roughness:.9});
 mat('larchInt',{map:T.larchInt,roughness:.75});
 mat('ceil',{map:T.ceil,roughness:.8});
 mat('oldWood',{map:T.oldWood,roughness:.92});
-mat('oak',{map:T.oak,roughness:.6});mat('oakRaw',{map:T.oakRaw,roughness:.72});
+mat('oak',{map:T.oak,roughness:.6});mat('hemlock',{map:T.hemlock,roughness:.7});mat('abachi',{map:T.abachi,roughness:.8});mat('oakRaw',{map:T.oakRaw,roughness:.72});
 mat('oldOak',{map:T.oldOak,roughness:.95});
 // textures photo des tables (photos fournies)
 const photoTex=(id,rx,ry)=>{const t=new THREE.TextureLoader().load('data:image/jpeg;base64,'+document.getElementById(id).textContent.trim());t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rx,ry);t.anisotropy=ANISO;return t;};
@@ -1464,12 +1466,32 @@ function decorate(){
   bx(4.2,5.4,5.32,5.62,z2,z2+.45,MAT.oldWood,0);
   // sauna et salle de sport : sauna adossé au mur du fond (bancs le long du mur, façade vitrée vers la salle),
   // douche à sa droite, dans l'angle contre le mur du local technique
-  {const x0=8.61,x1=11.31,y0=8.21,y1=9.91,L=MAT.larchInt;
-   bx(x0,x1,y0,y0+.05,z2,z2+2.2,MAT.glass,0);bx(x0-.05,x0,y0,y1,z2,z2+2.2,L,0);bx(x0-.05,x1,y0,y1,z2+2.2,z2+2.3,L,0);   // façade vitrée, cloison bois, plafond
-   bx(x0+.6,x0+.66,y0-.01,y0+.06,z2,z2+2.1,L,0);bx(x0+.66,x0+1.36,y0-.01,y0+.06,z2+2.04,z2+2.1,L,0);                   // huisserie de la porte vitrée
-   bx(x0,x1,y1-.7,y1,z2+.45,z2+.5,L,0);bx(x0,x1,y1-.7,y1-.66,z2,z2+.45,L,0);                                            // banc bas
-   bx(x0,x1,y1-.36,y1,z2+.9,z2+.95,L,0);bx(x0,x1,y1-.36,y1-.32,z2+.5,z2+.9,L,0);                                        // banc haut
-   bx(x1-.55,x1-.1,y0+.15,y0+.55,z2,z2+.7,MAT.steel,0);for(let i=0;i<9;i++)sph(x1-.5+(i%3)*.15,y0+.2+Math.floor(i/3)*.15,z2+.75,.07,MAT.granite,0);} // poêle et pierres
+  // sauna finlandais 2530-B (4 places) : 1,99 × 1,68 × 2,02 m, murs Hemlock, bancs Abachi, façade et côté droit en verre clair
+  {const x0=8.61,x1=10.60,y0=8.23,y1=9.91,h=2.02,Hm=MAT.hemlock,Ab=MAT.abachi,G=MAT.glass,zb=z2,zt=z2+h,p=.07;
+   bx(x0,x1,y0,y1,zb,zb+.06,Hm,0);                                                                                // socle
+   bx(x0,x0+.06,y0,y1,zb,zt,Hm,0);bx(x0,x1,y1-.06,y1,zb,zt,Hm,0);                                                 // mur gauche (côté douche) et mur du fond
+   bx(x0,x1,y0,y1,zt-.08,zt,Hm,0);bx(x0-.01,x1+.01,y0-.01,y1+.01,zt-.14,zt-.06,Hm,0);                            // plafond et bandeau supérieur
+   for(const x of[x0,x0+.84,x0+1.5,x1-p])bx(x,x+p,y0,y0+.07,zb,zt,Hm,0);                                       // montants de façade
+   bx(x1-p,x1,y1-.07,y1,zb,zt,Hm,0);bx(x0,x1,y0,y0+.07,zb,zb+.12,Hm,0);bx(x1-.07,x1,y0,y1,zb,zb+.12,Hm,0);        // montant arrière droit, lisses basses
+   bx(x0+p,x0+.84,y0+.03,y0+.04,zb+.12,zt-.14,G,0);bx(x0+.91,x0+1.5,y0+.03,y0+.04,zb+.02,zt-.16,G,0);           // vitrage fixe et porte vitrée
+   bx(x0+1.57,x1-p,y0+.03,y0+.04,zb+.12,zt-.14,G,0);bx(x1-.04,x1-.03,y0+.07,y1-.07,zb+.12,zt-.14,G,0);           // vitrage d'angle et côté droit vitré
+   for(const z of[zb+.6,zb+1.5])bx(x0+1.495,x0+1.505,y0-.01,y0+.08,z,z+.05,MAT.chrome,0);                          // paumelles
+   for(const x of[x0+.97,x0+1.03])bx(x,x+.02,y0-.08,y0-.06,zb+.75,zb+1.35,MAT.chrome,0);bx(x0+.97,x0+1.05,y0-.07,y0+.03,zb+.78,zb+.8,MAT.chrome,0);bx(x0+.97,x0+1.05,y0-.07,y0+.03,zb+1.3,zb+1.32,MAT.chrome,0); // poignée double
+   for(let x=x0+.08;x<x1-.1;x+=.12)bx(x,x+.09,y0+.1,y1-.08,zb+.06,zb+.09,Ab,0);                                // caillebotis
+   // bancs en Abachi : banc haut le long du fond, banc bas en L (fond + côté vitré), dossiers à lattes avec éclairage LED
+   bx(x0+.06,x1-.07,y1-.6,y1-.06,zb+.92,zb+.96,Ab,0);bx(x0+.06,x1-.07,y1-.6,y1-.56,zb+.5,zb+.92,Ab,0);
+   bx(x0+.75,x1-.07,y1-1.05,y1-.6,zb+.45,zb+.49,Ab,0);bx(x0+.75,x1-.07,y1-1.05,y1-1.01,zb+.06,zb+.45,Ab,0);
+   bx(x1-.55,x1-.07,y0+.1,y1-1.05,zb+.45,zb+.49,Ab,0);bx(x1-.55,x1-.51,y0+.1,y1-1.05,zb+.06,zb+.45,Ab,0);
+   for(const z of[zb+1.25,zb+1.42])bx(x0+.06,x1-.07,y1-.1,y1-.06,z,z+.09,Ab,0);
+   for(const z of[zb+1.2,zb+1.37,zb+1.54])bx(x0+.06,x1-.07,y1-.065,y1-.06,z,z+.025,MAT.ledStrip,0);
+   for(const z of[zb+.75,zb+.9])bx(x1-.12,x1-.08,y0+.15,y1-.1,z,z+.09,Ab,0);                                   // dossier bas côté vitré
+   // poêle électrique noir et acier avec pierres, garde-corps en Abachi (avant gauche)
+   {const a=x0+.12,b=x0+.6,c=y0+.15,d=y0+.55;bx(a,b,c,d,zb+.06,zb+.78,MAT.black,0);bx(a+.02,b-.02,c+.02,d-.02,zb+.06,zb+.2,MAT.steel,0);
+    for(let i=0;i<12;i++)sph(a+.07+(i%4)*.11,c+.08+Math.floor(i/4)*.12,zb+.82,.055,MAT.granite,0);
+    for(const z of[zb+.5,zb+.75])bx(b+.02,b+.06,c-.02,d+.02,z,z+.07,Ab,0);for(const z of[zb+.5,zb+.75])bx(a-.02,b+.06,c-.06,c-.02,z,z+.07,Ab,0);}
+   for(const[x,y]of[[x0+.5,y0+.6],[x0+1.2,y0+.9],[x0+1.6,y1-.5]])cyl(x,y,zt-.085,zt-.08,.035,MAT.bulb,0,10);      // spots au plafond
+   COLL.push({ax:x0,ay:y0,ux:1,uy:0,s0:0,s1:.91,t:.06,zmin:zb,zmax:zt,lv:0},{ax:x0+1.5,ay:y0,ux:1,uy:0,s0:0,s1:x1-x0-1.5,t:.06,zmin:zb,zmax:zt,lv:0},
+            {ax:x1,ay:y0,ux:0,uy:1,s0:0,s1:y1-y0,t:.06,zmin:zb,zmax:zt,lv:0},{ax:x0,ay:y0,ux:0,uy:1,s0:0,s1:y1-y0,t:.06,zmin:zb,zmax:zt,lv:0});}
   {const x0=7.36,x1=8.56,y0=8.71,y1=9.91;
    bx(x0,x1,y0,y1,z2,z2+.05,MAT.granite,0);                                                                            // receveur extra-plat
    bx(7.34,7.365,y0,y1,z2+.05,z2+2.1,MAT.tileF,0);bx(x0,x1,y1-.025,y1,z2+.05,z2+2.1,MAT.tileF,0);                       // faïence murale
@@ -1934,6 +1956,7 @@ function buildLights(){
   for(const x of[1.5,4.6,7.7,10.8])ext(x,-.7,Z1+1.7,5,6);for(const y of[2.5,6.5])ext(12.3,y,Z1+1.7,4,5);
   for(const x of[2.0,6.2,10.4])ext(x,-.6,Z2+1.6,4,5.5);
   ext(9.7,1.25,Z1+2.25,7,6);
+  plight(9.6,9.2,Z2+1.75,5,3.2,0xffcf9a);                                   // éclairage chaud du sauna (spots + LED)
 }
 let STARS;
 function buildStars(){const N=1500,p=new Float32Array(N*3),R=rng(3);for(let i=0;i<N;i++){const a=R()*Math.PI*2,e=Math.asin(R()*.98+.02),r=20000;p[i*3]=Math.cos(e)*Math.cos(a)*r;p[i*3+1]=Math.sin(e)*r;p[i*3+2]=Math.cos(e)*Math.sin(a)*r;}
