@@ -654,7 +654,7 @@ function wall(o){
       wb(s0-.06,s1+.06,zt,zt+.07,-t/2-.015,t/2+.015,MAT.beam);
       if(op.k==='door'){ // vantail ouvert à 90° côté du débattement dessiné sur le plan
         const sd=op.side||-1,hs=op.hinge?s1-.045:s0+.005,e0=sd>0?t/2+.01:-t/2-w+.03,e1=sd>0?t/2+w-.03:-t/2-.01;
-        wb(hs,hs+.04,zb+.01,zt-.01,e0,e1,MAT.oldWood);
+        wb(hs,hs+.04,zb+.01,zt-.01,e0,e1,MAT.oakRaw);
         const eh=sd>0?e1-.08:e0+.08;wb(hs-.05,hs+.09,zb+1.0,zb+1.04,eh-.06,eh+.06,MAT.brass);}
       if(op.k==='slide'){wb(op.pocket<0?s0-.05:s1,op.pocket<0?s0:s1+.05,zb+1.0,zb+1.1,-t/2-.016,t/2+.016,MAT.brass);}
     }else if(op.k==='entry'){
@@ -875,8 +875,12 @@ function Hbase(X,Y){
   for(const c of CUTS){const dx=Math.max(c.x0-X,0,X-c.x1),dy=Math.max(c.y0-Y,0,Y-c.y1),d=Math.hypot(dx,dy);
     cut=Math.min(cut,d===0?c.inside:c.base+.85*d);}
   z=Math.min(z,cut);
+  // talus derrière le mur de soutènement du parvis (droit + quart de cercle) : terre au niveau du mur (+1,15) puis pente 1/1
+  if(X>7.0&&X<13.3&&Y>15.3&&Y<19&&!inPoly(X,Y,RPOLY)){const d=X<11.1?Y-15.47:Math.hypot(X-11.1,Y-15.32)-1.77;z=Math.min(z,1.15+Math.max(0,d));}
   // rampe d'accès
   const[rzz,rw]=rampZ(X,Y);if(rw>0)z=mix(z,rzz,rw);
+  if(X>11.0&&Y>15.2&&Math.hypot(X-11.1,Y-15.32)<1.98)z=1.12;           // massif planté entre les deux murs de soutènement (jusque sous la couvertine)
+  else if(inPoly(X,Y,RPOLY))z-=.2;                                       // terrain sous le pavage de la rampe (ne le perce plus)
   // terrain modelé du chalet voisin Dhommée
   z=DHT.adjust(z,X,Y);
   return z;
@@ -992,7 +996,7 @@ function buildHouse(){
   wall({...r1,a:[11.62,6.8],b:[11.62,10.0],top:-.15,t:.5,ext:st,ops:[pf(.7,1.9)]});   // chambre : double porte-fenêtre
   for(const[a,b]of[[6.7,7.46],[9.44,10.2]]){                                                    // volets bois ouverts (comme au R-2)
     bx(11.9,11.94,a,b,Z1+.02,Z1+2.15,MAT.larchExt,1);for(const zz of[Z1+.35,Z1+1.75])bx(11.94,11.97,a+.05,b-.05,zz,zz+.12,MAT.larchExt,1);}
-  wall({...r1,a:[11.62,10.0],b:[7.24,10.0],top:0,t:.5,ext:st,int:pl});
+  wall({...r1,a:[11.62,10.0],b:[7.24,10.0],top:-.03,t:.5,ext:st,int:pl});   // arasé sous le dallage du parvis (plus de bande claire)
   wall({...r1,a:[7.24,10.0],b:[7.24,15.18],top:-.31,t:.5,ext:st,int:pl});
   wall({...r1,a:[7.24,15.18],b:[.19,15.18],top:-.31,t:.5,ext:st,int:li});
   wall({...r1,a:[.19,15.18],b:[.19,6.6],top:-.31,t:.38,ext:MAT.enduit,int:pl});
@@ -1002,13 +1006,13 @@ function buildHouse(){
   const r1i={lv:1,z0:Z1-.02,top:-.31,floor:Z1,t:.1,int:li};
   wall({...r1i,a:[4.5,6.98],b:[7.24,6.98]});
   // chambre parentale : mur bois côté séjour passé en enduit blanc, mur blanc de la tête de lit habillé de lambris
-  {const N=44,x0=4.56,x1=11.43,top=X=>X<7.24?-.31:Math.max(-.31,frontU(X)+.02);
+  {const N=44,x0=4.56,x1=11.43,top=X=>-.31;                                         // jusqu'au plafond de la chambre (sous le parvis)
    for(let i=0;i<N;i++){const a=x0+(x1-x0)*i/N,b=x0+(x1-x0)*(i+1)/N;const y0=a<7.24?7.031:7.066;bx(a,b,y0,y0+.012,Z1+.08,Math.min(top(a),top(b)),MAT.paintWhite,1);}}
   bx(7.18,7.3,7.031,7.078,Z1+.08,-.31,MAT.paintWhite,1);
   bx(7.3,11.37,9.733,9.749,Z1+.08,-.33,MAT.larchInt,1);bx(6.96,7.53,9.675,10.21,Z1,-.31,MAT.larchInt,1);bx(6.955,7.535,9.665,10.21,Z1,Z1+.08,MAT.beam,1); // angle du mur habillé de lambris (plus de pierre côté chambre)bx(7.3,11.37,9.72,9.749,Z1,Z1+.08,MAT.beam,1);
   // grand mur du séjour face aux baies vitrées : enduit blanc (au-dessus de la plinthe)
   {const N=44,x0=4.56,x1=11.43,top=X=>X<7.24?-.31:Math.max(-.31,frontU(X)+.02);
-   for(let i=0;i<N;i++){const a=x0+(x1-x0)*i/N,b=x0+(x1-x0)*(i+1)/N;bx(a,b,6.904,6.916,Z1+.08,Math.min(top(a),top(b)),MAT.paintWhite,1);}}
+   for(let i=0;i<N;i++){const a=x0+(x1-x0)*i/N,b=x0+(x1-x0)*(i+1)/N;bx(a,b,6.904,6.916,Z1+.08,Math.min(top(a),top(b))-.08,MAT.paintWhite,1);}}   // arrêté sous la rive du toit (invisible depuis le parvis)
   wall({...r1i,a:[4.5,6.98],b:[4.5,13.39],ops:[door(.66,.84,2.04,1,0),door(1.62,.73,2.04,1,1)]}); // chambre, WC
   wall({...r1i,a:[4.55,8.48],b:[5.67,8.48],int:pl});                              // WC
   wall({...r1i,a:[5.67,8.48],b:[5.67,9.9],int:pl});
@@ -1058,12 +1062,11 @@ function buildHouse(){
   wall({...r0,a:[7.8,3.75],b:[7.8,6.95],top:()=>midU(7.8)});
   wall({...r0,a:[7.8,6.95],b:[7.24,6.95],t:.3,top:midU});
   wall({...r0,a:[7.24,6.95],b:[7.24,15.2],top:()=>upU(7.24),ops:[{k:'entry',s:.42,w:.85,sill:0,h:2.1},{k:'gar',s:1.61,w:2.5,sill:0,h:2.2},{k:'gar',s:4.62,w:2.5,sill:0,h:2.2}]});
-  wall({...r0,a:[7.24,15.2],b:[5.0,15.2],top:2.6,t:.5,ext:MAT.enduit,int:MAT.concrete});
-  wall({lv:2,a:[7.24,15.2],b:[5.0,15.2],z0:2.6,top:upU,t:.3,ext:lx,int:li,noColl:true});
-  wall({...r0,a:[5.0,15.2],b:[.38,13.7],top:2.6,t:.5,ext:MAT.enduit,int:MAT.concrete,ops:[win(2.4,.8,1.15,1.0)]});
-  wall({lv:2,a:[5.0,15.2],b:[.38,13.7],z0:2.6,top:upU,t:.3,ext:lx,int:li,noColl:true});
-  wall({...r0,a:[.38,13.7],b:[.38,6.95],top:()=>upU(.38),ext:MAT.enduit,int:MAT.concrete,ops:[win(4.4,.8,.1,1.0)]});
-  bx(.135,.168,6.95,13.7,1.45,upU(.38),MAT.larchExt,2);
+  // garage rectangulaire : mur Nord droit, dans le prolongement du mur Nord du R-1
+  wall({...r0,a:[7.24,15.2],b:[.38,15.2],top:2.6,t:.5,ext:MAT.enduit,int:MAT.concrete,ops:[win(4.5,.8,1.15,1.0)]});
+  wall({lv:2,a:[7.24,15.2],b:[.38,15.2],z0:2.6,top:upU,t:.3,ext:lx,int:li,noColl:true});
+  wall({...r0,a:[.38,15.2],b:[.38,6.95],top:()=>upU(.38),ext:MAT.enduit,int:MAT.concrete,ops:[win(5.9,.8,.1,1.0)]});
+  bx(.135,.168,6.95,15.2,1.45,upU(.38),MAT.larchExt,2);
   wall({...r0,a:[.38,6.95],b:[.38,3.75],top:()=>midU(.38)});
   wall({lv:2,a:[.38,6.95],b:[7.24,6.95],bot:midT,top:upU,t:.3,ext:lx,int:li,noColl:true,
         ops:[cv(.92,1.36,(X)=>midT(X)+.18,.12),cv(3.82,1.36,(X)=>midT(X)+.18,.12)]});
@@ -1087,12 +1090,17 @@ function buildHouse(){
   // parvis d'entrée dallé (sur le R-1) et plateforme garage
   slab([7.24,11.62,6.95,10.0],Z0,.31,2,MAT.paving,MAT.ceil);
   slab([7.0,12.72,10.0,15.2],Z0,.6,9,MAT.paving,MAT.concrete);
-  railing(11.62,6.98,11.62,10.0,Z0,2);
+  // muret en pierre en face de la porte d'entrée, même parement que les murs de soutènement
+  wall({lv:2,a:[11.47,6.98],b:[11.47,10.0],z0:Z0-.31,top:Z0+.95,t:.3,ext:st,int:st,floor:Z0,skirt:false});
+  bx(11.3,11.64,6.93,10.05,Z0+.95,Z0+1.0,MAT.stone,2);                                                      // couvertine en pierre
   railing(7.85,6.98,11.62,6.98,Z0,2);
   // murs de soutènement (enduit à pierres vues)
   wall({lv:9,a:[7.24,15.32],b:[12.72,15.32],z0:-.6,top:1.15,t:.3,int:st,floor:0});
   for(let i=0;i<6;i++){const a0=i/6*Math.PI/2,a1=(i+1)/6*Math.PI/2,c=[11.1,15.32],R=1.62;
-    wall({lv:9,a:[c[0]+R*Math.cos(a0),c[1]+R*Math.sin(a0)],b:[c[0]+R*Math.cos(a1),c[1]+R*Math.sin(a1)],z0:-.6,top:1.15,t:.3,int:st});}
+    wall({lv:9,a:[c[0]+R*Math.cos(a0),c[1]+R*Math.sin(a0)],b:[c[0]+R*Math.cos(a1),c[1]+R*Math.sin(a1)],z0:-.6,t:.3,int:st,  // mur courbe : retient la rampe, arasé à son niveau
+      top:(X,Y)=>{const dx=X-c[0],dy=Y-c[1],l=Math.hypot(dx,dy)||1;return Math.max(1.15,rampS(rampNear(c[0]+dx/l*2.0,c[1]+dy/l*2.0)[1])+.08);}});
+    {const am=(a0+a1)/2,zt=Math.max(1.15,rampS(rampNear(c[0]+Math.cos(am)*2.0,c[1]+Math.sin(am)*2.0)[1])+.08);         // couvertine jusqu'au pavage
+     obox(c[0]+Math.cos(am)*1.82,c[1]+Math.sin(am)*1.82,zt-.06,zt+.02,R*(a1-a0)*1.13+.06,.48,am+Math.PI/2,MAT.stone,9);}}
   // cour SE dallée devant la porte du R-2
   bx(11.83,12.95,3.1,7.25,-5.8,-5.74,MAT.paving,9,{cast:false});
   wall({lv:9,a:[11.82,7.35],b:[13.5,7.35],z0:-5.95,top:-3.1,t:.2,int:st,floor:-5.8});   // mur de soutènement perpendiculaire à la façade (plan R-2)
@@ -1100,7 +1108,7 @@ function buildHouse(){
   /* ----- escaliers (15 marches 15g × 28 / 17,19) ----- */
   // cage d'escalier : faces intérieures des murs extérieurs (NO) en blanc
   bx(.5,.514,6.1,9.4,Z2+.08,Z1-.35,MAT.paintWhite,0);bx(.38,.394,5.18,9.4,Z1+.08,-.31,MAT.paintWhite,1);bx(.57,.584,6.1,9.4,Z0+.08,2.45,MAT.paintWhite,2);
-  Lstair(Z2,Z1,0);
+  Lstair(Z2,Z1,0,true);
   Lstair(Z1,Z0,1,true);
   // mur de soutènement en pierre sous la rampe (PCMI 6)
   for(let i=1;i<11;i++){const[a,b]=RPOLY[i],[c,d]=RPOLY[i+1];
@@ -1131,7 +1139,7 @@ function buildHouse(){
   for(const x of[1.6,3.43,5.8]){const yw=(x<5?13.7+(x-.38)/4.62*1.5:15.2)+.25;strut(ROOF.up,x,yw,15.95,3,2.65);}
   roofSide(ROOF.fr,11.62,13.0,6.95,10.0,{});
   // panneaux photovoltaïques (13 m²) — versant SE de la toiture avant
-  slope(ROOF.fr,11.05,12.85,-.9,6.3,-.07,-.01,MAT.pv,3);
+  slope(ROOF.up,4.6,6.6,8.9,15.3,-.07,-.01,MAT.pv,3);                                   // panneaux solaires sur le toit du garage
   // fenêtre de toit 78/98
   slope(ROOF.mid,4.75,5.55,4.3,5.1,-.06,0,MAT.screen,3);
   // souche de cheminée habillée (tronc de pyramide) + conduit
@@ -1475,7 +1483,7 @@ function decorate(){
   bx(3.95,4.6,8.6,9.27,z2,z2+.85,MAT.white,0);bx(3.95,4.6,8.6,9.27,z2+.85,z2+1.7,MAT.white,0);
   for(const zz of[z2+.42,z2+1.27]){const g=new THREE.CylinderGeometry(.2,.2,.02,20);g.rotateZ(Math.PI/2);g.translate(4.6,zz,-8.93);addGeo(g,MAT.screen,0);}
   bx(4.7,5.45,8.75,9.27,z2,z2+.88,MAT.oldWood,0);bx(4.7,5.45,8.75,9.27,z2+.88,z2+.92,MAT.granite,0);
-  shelves(3.95,5.45,6.8,7.15,z2,2.2,0,MAT.larchInt,5);
+  shelves(3.57,3.92,7.0,8.55,z2,2.2,0,MAT.larchInt,5);                      // étagère contre le mur Ouest (porte dégagée)
   bx(5.65,6.3,8.7,9.27,z2,z2+1.0,MAT.white,0);cyl(6.65,8.9,z2,z2+1.8,.3,MAT.white,0,20);
   bx(5.65,6.95,6.8,6.95,z2+1.2,z2+1.8,MAT.white,0);
   shelves(1.86,2.2,6.7,8.2,z2,2.0,0,MAT.oldWood,8,false);shelves(2.98,3.33,6.75,8.25,z2,2.0,0,MAT.oldWood,8,false);
@@ -1695,7 +1703,7 @@ function buildDhommee(){
 }
 function buildSite(){
   // rampe d'accès pavée d'un seul tenant, pente 20 %
-  {const st=.25,x0=8.5,x1=20.5,y0=10.25,y1=20.45,nx=Math.ceil((x1-x0)/st),ny=Math.ceil((y1-y0)/st),pos=[],uv=[],idx=[],vid=new Map();
+  {const st=.1,x0=8.5,x1=20.5,y0=10.25,y1=20.45,nx=Math.ceil((x1-x0)/st),ny=Math.ceil((y1-y0)/st),pos=[],uv=[],idx=[],vid=new Map();
    const V=(i,j)=>{const k=i*10000+j;if(vid.has(k))return vid.get(k);const X=x0+i*st,Y=y0+j*st;pos.push(X,rampS(rampNear(X,Y)[1])+.03,-Y);uv.push(X,Y);vid.set(k,pos.length/3-1);return pos.length/3-1;};
    for(let i=0;i<nx;i++)for(let j=0;j<ny;j++){if(!inPoly(x0+(i+.5)*st,y0+(j+.5)*st,RPOLY))continue;const a=V(i,j),b=V(i+1,j),c=V(i,j+1),d=V(i+1,j+1);idx.push(a,c,b,b,c,d);}
    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();
