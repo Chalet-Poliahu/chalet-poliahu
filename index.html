@@ -1466,8 +1466,8 @@ function decorate(){
   bx(4.2,5.4,5.32,5.62,z2,z2+.45,MAT.oldWood,0);
   // sauna et salle de sport : sauna adossé au mur du fond (bancs le long du mur, façade vitrée vers la salle),
   // douche à sa droite, dans l'angle contre le mur du local technique
-  // sauna finlandais 2530-B (4 places) : 1,99 × 1,68 × 2,02 m, murs Hemlock, bancs Abachi, façade et côté droit en verre clair
-  {const x0=8.61,x1=10.60,y0=8.23,y1=9.91,h=2.02,Hm=MAT.hemlock,Ab=MAT.abachi,G=MAT.glass,zb=z2,zt=z2+h,p=.07;
+  // sauna finlandais 2530-B (4 places) : 1,99 × 1,68 × 2,02 m, dans l'angle Nord-Est, murs Hemlock, bancs Abachi, façade et côté droit en verre clair
+  {const x0=9.32,x1=11.31,y0=8.23,y1=9.91,h=2.02,Hm=MAT.hemlock,Ab=MAT.abachi,G=MAT.glass,zb=z2,zt=z2+h,p=.07;
    bx(x0,x1,y0,y1,zb,zb+.06,Hm,0);                                                                                // socle
    bx(x0,x0+.06,y0,y1,zb,zt,Hm,0);bx(x0,x1,y1-.06,y1,zb,zt,Hm,0);                                                 // mur gauche (côté douche) et mur du fond
    bx(x0,x1,y0,y1,zt-.08,zt,Hm,0);bx(x0-.01,x1+.01,y0-.01,y1+.01,zt-.14,zt-.06,Hm,0);                            // plafond et bandeau supérieur
@@ -1956,7 +1956,7 @@ function buildLights(){
   for(const x of[1.5,4.6,7.7,10.8])ext(x,-.7,Z1+1.7,5,6);for(const y of[2.5,6.5])ext(12.3,y,Z1+1.7,4,5);
   for(const x of[2.0,6.2,10.4])ext(x,-.6,Z2+1.6,4,5.5);
   ext(9.7,1.25,Z1+2.25,7,6);
-  plight(9.6,9.2,Z2+1.75,5,3.2,0xffcf9a);                                   // éclairage chaud du sauna (spots + LED)
+  plight(10.3,9.2,Z2+1.75,5,3.2,0xffcf9a);                                   // éclairage chaud du sauna (spots + LED)
 }
 let STARS;
 function buildStars(){const N=1500,p=new Float32Array(N*3),R=rng(3);for(let i=0;i<N;i++){const a=R()*Math.PI*2,e=Math.asin(R()*.98+.02),r=20000;p[i*3]=Math.cos(e)*Math.cos(a)*r;p[i*3+1]=Math.sin(e)*r;p[i*3+2]=Math.cos(e)*Math.sin(a)*r;}
