@@ -467,6 +467,9 @@ mat('woven',{map:T.woven,roughness:1});
 mat('wovenShade',{color:0x9c8a70,emissive:0x5a4020,emissiveIntensity:.25,roughness:1,side:THREE.DoubleSide});
 mat('enamel',{color:0x0d0d0d,roughness:.15,metalness:.1,side:THREE.DoubleSide});
 mat('shadeIn',{color:0xf2efe8,emissive:0xffd9a0,emissiveIntensity:.35,roughness:.6,side:THREE.BackSide});
+mat('augGris',{color:0x4b5654,roughness:.12,metalness:.25,side:THREE.DoubleSide});
+mat('augChrome',{color:0xe8e8e8,metalness:1,roughness:.12});
+mat('augOr',{color:0xc9a050,metalness:.85,roughness:.45,emissive:0x8a5a14,emissiveIntensity:.35,side:THREE.BackSide});
 mat('redCord',{color:0xb3241c,roughness:.8});
 mat('chromeWire',{color:0xd8d8d8,metalness:1,roughness:.25,wireframe:true});
 mat('photo',{map:T.skiphoto,roughness:.6});
@@ -1228,6 +1231,16 @@ function hercule(x,y,zTop,zBot,lv,D=.5){const k=D/.5;
   const gi=new THREE.LatheGeometry(pr.slice(0,6).map(v=>new THREE.Vector2(v.x*.97,v.y+.004)),32);gi.translate(x,zBot,-y);addGeo(gi,MAT.shadeIn,lv,{cast:false});
   cyl(x,y,zBot+.3*k,zBot+.3*k+.035,.016,MAT.black,lv,10);cyl(x,y,zBot+.3*k+.035,zTop,.004,MAT.redCord,lv,6);
   sph(x,y,zBot+.09*k,.05*k,MAT.bulb,lv,1,1,1.2,1);}
+// suspension Jieldé Augustin Ø160 : abat-jour gris granit brillant, intérieur or nacré mat, bague chromée, étrier, tige noire, rosace grise
+function augustin(x,y,zTop,zBot,lv){
+  const pr=[[.0805,0],[.0798,.012],[.077,.04],[.071,.07],[.061,.1],[.047,.125],[.03,.143],[.024,.15],[.022,.156],[0,.158]].map(q=>new THREE.Vector2(q[0],q[1]));
+  const g=new THREE.LatheGeometry(pr,32);g.translate(x,zBot,-y);addGeo(g,MAT.augGris,lv);
+  const gi=new THREE.LatheGeometry(pr.slice(0,7).map(v=>new THREE.Vector2(v.x*.975,v.y+.003)),32);gi.translate(x,zBot,-y);addGeo(gi,MAT.augOr,lv,{cast:false});
+  cyl(x,y,zBot+.15,zBot+.185,.022,MAT.augChrome,lv,16);                                            // bague chromée
+  for(const s of[-1,1])bx(x+s*.034-.003,x+s*.034+.003,y-.012,y+.012,zBot+.165,zBot+.25,MAT.augGris,lv); // étrier
+  bx(x-.037,x+.037,y-.012,y+.012,zBot+.244,zBot+.25,MAT.augGris,lv);
+  cyl(x,y,zBot+.25,zTop-.02,.005,MAT.black,lv,6);cyl(x,y,zTop-.02,zTop,.055,MAT.augGris,lv,24);  // tige + rosace
+  sph(x,y,zBot+.06,.035,MAT.bulb,lv,1,1,1.2,1);}
 function pendant(x,y,zTop,zBot,lv,r=.14){cyl(x,y,zBot+.1,zTop,.005,MAT.black,lv,4);cyl(x,y,zBot,zBot+.18,r,MAT.copper,lv,16,.04);sph(x,y,zBot+.02,.05,MAT.bulb,lv,1,1,1,1);}
 function toilet(f){f.b(-.18,.18,-.1,.25,.0,.4,MAT.ceramic);f.c(0,-.15,.18,.42,.18,MAT.ceramic,16);f.b(-.2,.2,.18,.28,.4,.95,MAT.oldWood);}
 function vanity(f,w,n=1){f.b(-w/2,w/2,-.25,.25,.0,.82,MAT.oldWood);f.b(-w/2-.02,w/2+.02,-.27,.27,.82,.86,MAT.granite);
@@ -1294,7 +1307,7 @@ function decorate(){
   bx(.38,2.95,5.058,5.061,Z1,-.31,MAT.paintWhite,1);
   for(const zz of[z+1.4,z+1.8])bx(.38,.68,1.92,2.28,zz,zz+.05,MAT.oakRaw,1);
   bx(2.9,3.75,3.15,5.01,z,z+.1,MAT.black,1);bx(2.92,3.73,3.17,5.01,z+.1,z+.88,MAT.oakRaw,1);bx(2.9,4.0,3.1,5.01,z+.88,z+.93,MAT.gres,1);
-  for(const y of[3.6,4.6])pendant(3.4,y,-.31,z+1.75,1,.13);
+  for(const y of[3.6,4.6])augustin(3.4,y,-.31,z+1.75,1);                                  // 2 suspensions Jieldé Augustin 160 au-dessus du plan de travail
   // table rustique en chêne massif blanchi 3,00 × 1,10 m (modèle « table rustique manoir ») : plateau à embouts, pieds carrés, piètement en H
   {const x0=3.45,x1=6.45,y0=1.03,y1=2.13,ym=(y0+y1)/2,T=MAT.tmLeg;
    bx(x0+.1,x1-.1,y0,y1,z+.7,z+.76,MAT.tmTop,1);bx(x0,x0+.1,y0,y1,z+.7,z+.76,MAT.tmLeg,1);bx(x1-.1,x1,y0,y1,z+.7,z+.76,MAT.tmLeg,1);   // plateau (photo) + embouts
