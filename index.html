@@ -1367,19 +1367,19 @@ function decorate(){
   // WC
   toilet(F(5.12,9.57,z,0,1));vanity(F(5.37,8.85,z,3,1),.42,1);
   // chambre parentale
-  // muret de tête de lit : 2,00 m × 1,40 m, appuyé contre le mur Nord, à 1,50 m de l'angle (x = 7,24) ; lambris clair, chapeau en chêne
-  {const mx0=8.74,mx1=8.86,my0=7.75,my1=9.75;
+  // muret de tête de lit : 2,00 m × 1,40 m, appuyé contre le mur Nord, à 0,90 m de l'angle (x = 7,24) ; lambris clair, chapeau en chêne
+  {const mx0=8.14,mx1=8.26,my0=7.75,my1=9.75;
    bx(mx0,mx1,my0,my1,z,z+1.36,MAT.larchInt,1);bx(mx0-.02,mx1+.02,my0-.02,my1,z+1.36,z+1.4,MAT.oakRaw,1);
    bx(mx0-.012,mx1+.012,my0,my1,z,z+.08,MAT.beam,1);                                                    // plinthe
    COLL.push({ax:(mx0+mx1)/2,ay:my0,ux:0,uy:1,s0:0,s1:my1-my0,t:mx1-mx0,zmin:z,zmax:z+1.4,lv:1});}
   // lit 180 × 200 tête contre le muret, face à la double porte-fenêtre
-  bed(F(9.94,8.75,z,1,1),1.8,2.0,{duvet:MAT.linen,throw:MAT.tartanG,cush:MAT.felt,headH:.95,head:MAT.boucle});
-  nightstand(F(9.15,7.53,z,0,1));                                                                        // chevet côté Sud (côté Nord : 10 cm seulement)
-  {const x=9.15,y=9.72;bx(x-.06,x+.06,y-.03,y,z+1.05,z+1.2,MAT.brass,1);cyl(x,y-.12,z+1.05,z+1.2,.07,MAT.shade,1,14,.05);} // applique de lecture côté Nord
-  bx(9.35,10.65,9.70,9.733,z+1.3,z+2.09,MAT.black,1);bx(9.35,10.65,9.695,9.70,z+1.3,z+2.09,MAT.hope,1);   // « Hope » de Noe Two, au-dessus du lit
-  rug(9.25,11.25,7.35,9.7,z,1,MAT.sheep);
+  bed(F(9.34,8.75,z,1,1),1.8,2.0,{duvet:MAT.linen,throw:MAT.tartanG,cush:MAT.felt,headH:.95,head:MAT.boucle});
+  nightstand(F(8.55,7.53,z,0,1));                                                                        // chevet côté Sud (côté Nord : 10 cm seulement)
+  {const x=8.55,y=9.72;bx(x-.06,x+.06,y-.03,y,z+1.05,z+1.2,MAT.brass,1);cyl(x,y-.12,z+1.05,z+1.2,.07,MAT.shade,1,14,.05);} // applique de lecture côté Nord
+  bx(8.75,10.05,9.70,9.733,z+1.3,z+2.09,MAT.black,1);bx(8.75,10.05,9.695,9.70,z+1.3,z+2.09,MAT.hope,1);   // « Hope » de Noe Two, au-dessus du lit
+  rug(8.65,10.65,7.35,9.7,z,1,MAT.sheep);
   // petit bureau en chêne derrière le muret, plateau contre le muret, écran tourné vers l'Ouest
-  {const x0=8.22,x1=8.72,y0=8.15,y1=9.25;
+  {const x0=7.62,x1=8.12,y0=8.15,y1=9.25;
    bx(x0,x1,y0,y1,z+.72,z+.76,MAT.oak,1);                                                     // plateau
    for(const y of[y0+.03,y1-.06])bx(x0+.03,x1-.03,y,y+.03,z,z+.72,MAT.steel,1);bx(x1-.07,x1-.04,y0+.03,y1-.03,z+.6,z+.72,MAT.steel,1);
    bx(x0+.05,x1-.05,y1-.35,y1-.05,z+.52,z+.7,MAT.oak,1);                                       // caisson tiroir
@@ -1387,7 +1387,7 @@ function decorate(){
    bx(x1-.09,x1-.06,8.37,9.03,z+.92,z+1.3,MAT.black,1);bx(x1-.093,x1-.09,8.39,9.01,z+.94,z+1.28,MAT.screen,1); // écran 27"
    bx(x0+.08,x0+.23,8.47,8.93,z+.76,z+.775,MAT.white,1);bx(x0+.1,x0+.2,9.03,9.11,z+.76,z+.775,MAT.white,1); // clavier, souris
    cyl(x1-.08,9.17,z+.76,z+1.15,.012,MAT.black,1,6);bx(x1-.22,x1-.06,9.1,9.24,z+1.12,z+1.18,MAT.black,1);   // lampe de bureau
-   chair(F(7.85,8.7,z,1,1));}
+   chair(F(7.25,8.7,z,1,1));}
   // dressing sur-mesure
   shelves(4.57,4.99,10.27,12.3,z,2.3,1,MAT.oldWood,6);shelves(6.6,6.98,10.95,11.95,z,2.3,1,MAT.oldWood,6);
   // salle de bains d'un seul tenant : douche à l'italienne, double vasque, baignoire, WC en niche
