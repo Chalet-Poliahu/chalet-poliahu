@@ -470,6 +470,9 @@ mat('shadeIn',{color:0xf2efe8,emissive:0xffd9a0,emissiveIntensity:.35,roughness:
 mat('augGris',{color:0x4b5654,roughness:.12,metalness:.25,side:THREE.DoubleSide});
 mat('augChrome',{color:0xe8e8e8,metalness:1,roughness:.12});
 mat('augOr',{color:0xc9a050,metalness:.85,roughness:.45,emissive:0x8a5a14,emissiveIntensity:.35,side:THREE.BackSide});
+mat('matFab',{map:T.boucle,color:0xa3a3a3,roughness:1,side:THREE.DoubleSide});
+mat('matShell',{color:0x3c3d3f,roughness:.45});
+mat('matFabIn',{map:T.boucle,color:0xa3a3a3,roughness:1,side:THREE.BackSide});
 mat('redCord',{color:0xb3241c,roughness:.8});
 mat('chromeWire',{color:0xd8d8d8,metalness:1,roughness:.25,wireframe:true});
 mat('photo',{map:T.skiphoto,roughness:.6});
@@ -1219,6 +1222,19 @@ function armchair(f,m=MAT.leather){f.b(-.42,.42,-.42,.42,0,.18,MAT.steel);f.b(-.
 function chair(f){f.b(-.21,.21,-.21,.21,.43,.48,MAT.leatherDark);f.b(-.21,.21,.17,.21,.48,.92,MAT.oldWood);for(const u of[-.18,.18])for(const v of[-.18,.18])f.b(u-.02,u+.02,v-.02,v+.02,0,.43,MAT.steel);}
 function dchair(f){const W=MAT.oakPale;for(const u of[-.2,.2])for(const v of[-.2,.2])f.b(u-.022,u+.022,v-.022,v+.022,0,.45,W);
   f.b(-.22,.22,-.22,.22,.4,.46,W);f.b(-.21,.21,-.22,.2,.46,.52,MAT.boucle);for(const u of[-.2,.2])f.b(u-.022,u+.022,.18,.22,.45,.86,W);f.b(-.2,.2,.17,.22,.6,.85,MAT.boucle);}
+// chaise Mat (Normann Copenhagen) : coque garnie tissu gris chiné, dos de coque gris anthracite, piètement chêne naturel
+// 56 × 52 cm, assise 45 cm, hauteur 79 cm ; dos côté +v comme F(..., rot)
+function matChair(cx,cy,z,rot,lv){const out=[],put=(g,m)=>out.push([g,m]);
+  const AM=Math.PI*.6,mk=(r0,r1)=>{const g=new THREE.CylinderGeometry(r1,r0,.36,28,6,true,Math.PI-AM,2*AM),p=g.attributes.position;
+    for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),zz=p.getZ(i),f=Math.abs(Math.atan2(x,-zz))/AM,t=(y+.18)/.36;
+      p.setY(i,y-t*.3*Math.pow(f,1.6));}g.computeVertexNormals();g.translate(0,.61,0);return g;};
+  put(mk(.215,.265),MAT.matFabIn);put(mk(.222,.274),MAT.matShell);
+  {const g=new THREE.SphereGeometry(.25,28,12);g.scale(1.06,.16,1);g.translate(0,.435,-.01);put(g,MAT.matFab);}   // assise galbée
+  {const g=new THREE.CylinderGeometry(.24,.2,.025,28);g.scale(1.06,1,1);g.translate(0,.4,-.01);put(g,MAT.matShell);}
+  const leg=(a,b)=>{const A=new THREE.Vector3(...a),B=new THREE.Vector3(...b),d=B.clone().sub(A),g=new THREE.BoxGeometry(.03,d.length(),.045);
+    g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),d.clone().normalize()));const m=A.add(B).multiplyScalar(.5);g.translate(m.x,m.y,m.z);put(g,MAT.oakRaw);};
+  for(const u of[-1,1]){leg([u*.15,.39,.15],[u*.24,0,.23]);leg([u*.15,.39,-.15],[u*.24,0,-.23]);leg([u*.15,.39,.17],[u*.15,.39,-.17]);}  // pieds en U + longeron
+  const c=L3(cx,cy,z);for(const[g,m]of out){g.rotateY((rot&3)*Math.PI/2);g.translate(c.x,c.y,c.z);addGeo(g,m,lv);}}
 function wireChair(x,y,z,ang,lv){ // fauteuil fil d'acier chromé (type Platner)
   const pts=[[.06,0],[.12,.05],[.18,.18],[.16,.3],[.2,.4],[.34,.47],[.38,.62],[.36,.76]].map(p=>new THREE.Vector2(p[0],p[1]));
   const g=new THREE.LatheGeometry(pts,28,ang+Math.PI*.2,Math.PI*1.6);g.translate(x,z,-y);addGeo(g,MAT.chromeWire,lv,{cast:false});
@@ -1315,8 +1331,8 @@ function decorate(){
    for(const x of[x0+.22,x1-.34])for(const y of[y0+.1,y1-.22])bx(x,x+.12,y,y+.12,z,z+.7,T,1);                 // 4 pieds 12 × 12
    for(const x of[x0+.25,x1-.31])bx(x,x+.06,y0+.2,y1-.2,z+.2,z+.32,T,1);                                      // traverses d'about
    bx(x0+.31,x1-.31,ym-.04,ym+.04,z+.2,z+.32,T,1);}                                                          // longeron central
-  for(const x of[3.85,4.43,5.01,5.59,6.17]){dchair(F(x,.68,z,2,1));dchair(F(x,2.48,z,0,1));}
-  dchair(F(3.07,1.58,z,1,1));dchair(F(6.83,1.58,z,3,1));
+  for(const x of[3.85,4.43,5.01,5.59,6.17]){matChair(x,.68,z,2,1);matChair(x,2.48,z,0,1);}                    // chaises Mat (Normann Copenhagen)
+  matChair(3.07,1.58,z,1,1);matChair(6.83,1.58,z,3,1);
   // suspension en cascade au-dessus de la table
   const ball=(x,y,zb,r,lv)=>{cyl(x,y,zb+2*r,frontU(x)-.3,.005,MAT.black,lv,4);sph(x,y,zb+r,r,MAT.woven,lv,1,1,.85,2);cyl(x,y,zb+.02,zb+.04,r*.55,MAT.black,lv,16);sph(x,y,zb+r*.5,.05,MAT.bulb,lv,1,1,1,1);};
   for(const[x,h]of[[4.25,1.62],[4.95,1.5],[5.65,1.72]])hercule(x,1.58,frontU(x)-.3,z+h,1,.3);           // 3 suspensions Hercule Ø30, hauteurs décalées
