@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fiscalité RSU France</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout : formulaire à gauche (le foyer, les lots, la cession), avis de calcul à droite, collant sur grand écran. */
+:root {
+  --bg: #f3f6f7; --surface: #ffffff; --surface-2: #eaf0f2; --ink: #15222c; --muted: #56656f; --line: #d5dee3;
+  --accent: #0d6a62; --accent-ink: #ffffff; --accent-weak: #dff0ed;
+  --warn: #8a4b00; --warn-bg: #fff3dd; --bad: #b42318; --bad-bg: #fde8e6; --good: #1d6b2f;
+  --s1: #2a78d6; --s2: #eb6834;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e1418; --surface: #161f25; --surface-2: #1d2830; --ink: #e5ecef; --muted: #9caab3; --line: #2b3841;
+  --accent: #52c3b5; --accent-ink: #0b1614; --accent-weak: #15302d;
+  --warn: #f2b65c; --warn-bg: #2d2413; --bad: #f28b82; --bad-bg: #351a18; --good: #7fd18f;
+  --s1: #3987e5; --s2: #d95926; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0e1418; --surface: #161f25; --surface-2: #1d2830; --ink: #e5ecef; --muted: #9caab3; --line: #2b3841;
+  --accent: #52c3b5; --accent-ink: #0b1614; --accent-weak: #15302d;
+  --warn: #f2b65c; --warn-bg: #2d2413; --bad: #f28b82; --bad-bg: #351a18; --good: #7fd18f;
+  --s1: #3987e5; --s2: #d95926; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
+.wrap { max-width: 1280px; margin: 0 auto; }
+header.top { padding-block: 32px 20px; display: grid; gap: 8px; border-bottom: 1px solid var(--line); margin-bottom: 24px; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { font-family: var(--f-display); font-weight: 700; font-size: clamp(28px, 4.2vw, 44px); line-height: 1.05; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+h2 { font-family: var(--f-display); font-weight: 600; font-size: 21px; margin: 0; text-wrap: balance; }
+h3 { font-size: 15px; font-weight: 600; margin: 0; }
+p { margin: 0; }
+.lede { color: var(--muted); max-width: 70ch; }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 24px; align-items: start; }
+@media (max-width: 980px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.col { display: grid; gap: 20px; min-width: 0; }
+.results { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+@media (max-width: 980px) { .results { position: static; } }
+section.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; gap: 16px; min-width: 0; }
+.panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.step { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px 16px; }
+label.f { display: grid; gap: 4px; font-size: 13px; color: var(--muted); min-width: 0; }
+label.f > span.l { font-weight: 500; color: var(--ink); }
+label.f small { font-size: 12px; color: var(--muted); }
+input, select { font: inherit; font-size: 15px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 7px 9px; width: 100%; min-width: 0; }
+input[type=number] { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+label.chk { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; }
+label.chk input { width: auto; margin-top: 4px; }
+button { font: inherit; font-size: 14px; font-weight: 600; border-radius: 4px; padding: 8px 14px; cursor: pointer; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); }
+button.ghost { background: transparent; color: var(--accent); }
+button.small { padding: 4px 10px; font-size: 13px; }
+button.danger { border-color: var(--line); background: transparent; color: var(--muted); }
+.row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.lot { border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: grid; gap: 12px; background: var(--surface-2); }
+.lot-head { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.lot-head input { font-weight: 600; max-width: 260px; background: var(--surface); }
+.lot .fields { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.lot .wide { grid-column: 1 / -1; }
+.calc-hint { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+@media (max-width: 560px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.tile { background: var(--surface); padding: 14px; display: grid; gap: 2px; min-width: 0; }
+.tile .k { font-size: 12px; color: var(--muted); }
+.tile .v { font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-size: clamp(17px, 2vw, 22px); font-weight: 500; overflow-wrap: anywhere; }
+.tile.net .v { color: var(--accent); }
+.tile.tax .v { color: var(--ink); }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 8px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+td.n, th.n { text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+td .ref { display: block; font-size: 12px; color: var(--muted); }
+tr.total td { font-weight: 600; border-bottom: none; border-top: 2px solid var(--ink); }
+.pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--accent-weak); color: var(--accent); white-space: nowrap; }
+.notes { display: grid; gap: 8px; }
+.note { border-radius: 4px; padding: 10px 12px; font-size: 14px; background: var(--surface-2); border-left: 3px solid var(--accent); }
+.note.warn { background: var(--warn-bg); border-left-color: var(--warn); }
+.note.bad { background: var(--bad-bg); border-left-color: var(--bad); }
+.note b { font-weight: 600; }
+.chart-box { position: relative; }
+svg.chart { width: 100%; height: auto; display: block; }
+svg.chart text { fill: var(--muted); font-family: var(--f-mono); font-size: 11px; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; font-size: 12px; font-family: var(--f-mono); box-shadow: 0 4px 16px rgba(0,0,0,.12); white-space: nowrap; color: var(--ink); }
+.optim-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.card { border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.big { font-family: var(--f-mono); font-size: 20px; font-variant-numeric: tabular-nums; }
+details { border-top: 1px solid var(--line); padding-top: 12px; }
+summary { cursor: pointer; font-weight: 600; }
+.prose { display: grid; gap: 10px; max-width: 75ch; font-size: 14px; }
+.prose ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+a { color: var(--accent); }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.example-badge { font-size: 12px; font-weight: 600; color: var(--warn); background: var(--warn-bg); padding: 2px 8px; border-radius: 999px; }
+@media (prefers-reduced-motion: no-preference) { .tile .v { transition: color .2s; } }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">Restricted Stock Units · résident fiscal français</span>
+    <h1>Fiscalité RSU en France</h1>
+    <p class="lede">Estimez l'impôt sur le revenu, les prélèvements sociaux et les contributions dus quand vous vendez des RSU d'une société américaine, ce qu'il vous reste, et combien d'actions vendre pour payer le moins d'impôt. Les règles appliquées sont celles du Code général des impôts et du BOFiP en vigueur au 29 octobre 2026.</p>
+  </header>
+
+  <div class="grid">
+    <div class="col">
+      <section class="panel" aria-labelledby="h-foyer">
+        <div class="panel-head"><h2 id="h-foyer">Votre foyer fiscal</h2><span class="example-badge" id="ex-badge">Données d'exemple</span></div>
+        <div class="fields">
+          <label class="f"><span class="l">Année de la cession</span>
+            <select id="f-annee" data-k="foyer.annee"><option value="2025">2025 (déclarée en 2026)</option><option value="2026">2026 (déclarée en 2027)</option></select></label>
+          <label class="f"><span class="l">Situation</span>
+            <select id="f-couple" data-k="foyer.couple" data-type="bool"><option value="false">Célibataire, veuf, divorcé</option><option value="true">Marié ou pacsé (imposition commune)</option></select></label>
+          <label class="f"><span class="l">Nombre de parts</span><input id="f-parts" type="number" step="0.5" min="1" data-k="foyer.parts"><small>1 par adulte, 0,5 par enfant (1 dès le 3e)</small></label>
+          <label class="f"><span class="l">Personnes à charge</span><input id="f-pac" type="number" min="0" step="1" data-k="foyer.pac"></label>
+          <label class="f"><span class="l">Revenu net imposable hors RSU (€)</span><input id="f-revenu" type="number" min="0" step="1000" data-k="foyer.revenu"><small>Salaires après déduction de 10 %, revenus fonciers nets…</small></label>
+          <label class="f"><span class="l">Autres revenus du capital au PFU (€)</span><input id="f-autres" type="number" min="0" step="100" data-k="foyer.autresPFU"><small>Dividendes, intérêts, autres plus-values</small></label>
+          <label class="f"><span class="l">Moins-values reportables (€)</span><input id="f-mv" type="number" min="0" step="100" data-k="foyer.mvReport"><small>Des 10 dernières années</small></label>
+        </div>
+        <details>
+          <summary>Réglages avancés</summary>
+          <div class="fields" style="margin-top:12px">
+            <label class="f"><span class="l">RFR N-1 (€)</span><input id="f-rfr1" type="number" min="0" step="1000" data-k="foyer.rfrN1"><small>Pour le lissage de la CEHR</small></label>
+            <label class="f"><span class="l">RFR N-2 (€)</span><input id="f-rfr2" type="number" min="0" step="1000" data-k="foyer.rfrN2"></label>
+            <label class="f"><span class="l">Cotisations salariales, plan non qualifié (%)</span><input id="f-nq" type="number" min="0" max="30" step="0.5" data-k="foyer.tauxCotisNQ"><small>Environ 20 % sous 8 PASS, 10 % au-delà : voir votre bulletin de paie</small></label>
+            <label class="chk"><input id="f-deduc" type="checkbox" data-k="foyer.deduc10" data-type="check"><span>Appliquer la déduction de 10 % pour frais professionnels au gain imposé comme un salaire (seulement si votre salaire n'atteint pas déjà le plafond de cette déduction)</span></label>
+          </div>
+        </details>
+      </section>
+
+      <section class="panel" aria-labelledby="h-lots">
+        <div class="panel-head"><h2 id="h-lots">Vos lots de RSU acquis</h2><span class="step">un lot = une date de vesting</span></div>
+        <p class="muted" style="font-size:14px">Le <b>cours à l'acquisition</b> est le cours du jour du vesting (acquisition définitive). Il est converti en euros au taux de change de ce jour (BOI-RSA-ES-20-20-20 § 120-130). Le taux s'exprime en dollars pour 1 euro, comme la BCE le publie.</p>
+        <div id="lots" class="col" style="gap:12px"></div>
+        <div class="row-actions"><button type="button" class="ghost" id="add-lot">Ajouter un lot</button></div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-vente">
+        <div class="panel-head"><h2 id="h-vente">La cession envisagée</h2></div>
+        <div class="fields">
+          <label class="f"><span class="l">Date de cession</span><input id="v-date" type="date" data-k="vente.date"></label>
+          <label class="f"><span class="l">Prix de cession ($ par action)</span><input id="v-prix" type="number" min="0" step="0.01" data-k="vente.prix"></label>
+          <label class="f"><span class="l">Taux de change à la cession ($ pour 1 €)</span><input id="v-fx" type="number" min="0" step="0.0001" data-k="vente.fx"></label>
+          <label class="f"><span class="l">Frais de cession ($, total)</span><input id="v-frais" type="number" min="0" step="1" data-k="vente.frais"><small>Commission du courtier, déductible du prix</small></label>
+          <label class="f"><span class="l">Imposition de la plus-value</span>
+            <select id="v-opt" data-k="vente.pvOption"><option value="auto">Choisir le plus favorable</option><option value="pfu">Prélèvement forfaitaire unique (12,8 %)</option><option value="bareme">Option globale pour le barème</option></select></label>
+        </div>
+      </section>
+    </div>
+
+    <div class="col results">
+      <section class="panel" aria-labelledby="h-res" aria-live="polite">
+        <div class="panel-head"><h2 id="h-res">Ce que vous paierez</h2><span class="pill" id="res-year"></span></div>
+        <div class="tiles">
+          <div class="tile"><span class="k">Produit de cession</span><span class="v" id="t-produit"></span></div>
+          <div class="tile tax"><span class="k">Impôts et prélèvements</span><span class="v" id="t-impots"></span></div>
+          <div class="tile net"><span class="k">Net après impôts</span><span class="v" id="t-net"></span></div>
+          <div class="tile"><span class="k">Taux global</span><span class="v" id="t-taux"></span></div>
+        </div>
+        <div class="scroll"><table id="tab-lignes"><thead><tr><th>Prélèvement</th><th class="n">Assiette</th><th class="n">Montant</th></tr></thead><tbody></tbody></table></div>
+        <div class="notes" id="notes"></div>
+        <details><summary>Détail par lot</summary><div class="scroll" style="margin-top:10px"><table id="tab-lots"><thead><tr><th>Lot</th><th class="n">Vendues</th><th class="n">Gain d'acquisition</th><th class="n">Plus-value</th><th class="n">Abattement</th><th class="n">Imposable barème</th></tr></thead><tbody></tbody></table></div></details>
+      </section>
+    </div>
+  </div>
+
+  <section class="panel" aria-labelledby="h-opt" style="margin-top:24px">
+    <div class="panel-head"><h2 id="h-opt">Combien d'actions vendre ?</h2><span class="step">ordre de vente : lot le moins taxé d'abord</span></div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Net après impôts</span><span><i style="background:var(--s2)"></i>Impôts et prélèvements</span><span><i style="background:var(--muted);height:1px"></i>Seuil des 300 000 € de gain</span></div>
+    <div class="chart-box" id="chart-box"><svg class="chart" id="chart" viewBox="0 0 900 300" role="img" aria-label="Net et impôts selon le nombre d'actions vendues"></svg><div class="tip" id="tip" hidden></div></div>
+    <div class="optim-grid">
+      <div class="card">
+        <h3>J'ai besoin d'un montant net</h3>
+        <label class="f"><span class="l">Montant net visé (€)</span><input id="o-cible" type="number" min="0" step="1000" value="50000"></label>
+        <div id="o-cible-res"></div>
+        <div class="row-actions"><button type="button" class="small" id="o-apply">Appliquer cette répartition</button></div>
+      </div>
+      <div class="card">
+        <h3>Rester sous le seuil de 300 000 €</h3>
+        <div id="o-300"></div>
+      </div>
+      <div class="card">
+        <h3>Étaler sur plusieurs années</h3>
+        <div id="o-etal"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" style="margin-top:24px" aria-labelledby="h-regles">
+    <div class="panel-head"><h2 id="h-regles">Règles appliquées et limites</h2></div>
+    <div class="prose">
+      <details open><summary>Votre plan est-il « qualifié » ?</summary><div class="prose" style="margin-top:8px">
+        <p>Tout dépend de ce point. Une société américaine peut attribuer des RSU dans les conditions des articles L. 225-197-1 et suivants du Code de commerce, en général grâce à un <b>sous-plan français</b> (« French-qualified RSU », « French sub-plan »). Le gain d'acquisition est alors imposé l'année de la <b>vente</b>, avec un régime favorable (CGI art. 80 quaterdecies, applicable aux sociétés étrangères mères de votre employeur, IV).</p>
+        <p>Sans sous-plan, le gain est un <b>complément de salaire</b> imposé l'année du <b>vesting</b>, soumis aux cotisations sociales comme votre salaire, puis seule la plus-value est taxée à la vente (BOI-RSA-ES-20-20-20 § 10). Cherchez dans les documents du plan la date de l'assemblée générale (AGE, « shareholder approval ») qui a autorisé le plan : elle détermine le régime.</p>
+      </div></details>
+      <details><summary>Le gain d'acquisition (plans qualifiés)</summary><div class="prose" style="margin-top:8px"><ul>
+        <li><b>AGE après le 31/12/2017</b> : jusqu'à 300 000 € de gain par an, abattement de 50 % puis barème, prélèvements sociaux du patrimoine (18,6 % pour 2025 et 2026). Au-delà de 300 000 € : barème sans abattement, CSG/CRDS d'activité 9,7 % et contribution salariale 10 % (CGI 80 quaterdecies I, 200 A-3 ; CSS L136-6, L137-14).</li>
+        <li><b>AGE du 31/12/2016 au 31/12/2017</b> : même seuil de 300 000 €. En dessous, abattement pour durée de détention depuis le vesting : 50 % de 2 à 8 ans, 65 % au-delà de 8 ans.</li>
+        <li><b>AGE du 08/08/2015 au 30/12/2016</b> : pas de seuil, abattement pour durée de détention, prélèvements sociaux du patrimoine, pas de contribution salariale.</li>
+        <li><b>Attribution dès le 28/09/2012 et AGE avant le 08/08/2015</b> : barème comme un salaire, CSG/CRDS d'activité 9,7 % et contribution salariale 10 %.</li>
+        <li>Le seuil de 300 000 € est annuel et non reportable : il s'apprécie en additionnant tous les gains d'acquisition des actions cédées dans l'année (BOI-RSA-ES-20-20-20 § 44).</li>
+        <li>Une <b>moins-value</b> (vente sous le cours du vesting) se déduit du gain d'acquisition du même lot, avant abattement et avant d'apprécier le seuil de 300 000 € (§ 190).</li>
+      </ul></div></details>
+      <details><summary>La plus-value de cession</summary><div class="prose" style="margin-top:8px"><ul>
+        <li>Plus-value = prix de vente net de frais − cours du vesting, chacun converti en euros au taux de son jour.</li>
+        <li>Imposée au prélèvement forfaitaire unique : 12,8 % d'impôt + 18,6 % de prélèvements sociaux, soit 31,4 %. L'option pour le barème est globale : elle s'applique à tous vos revenus du capital de l'année (CGI 200 A-2). Pour des actions acquises depuis 2018, aucun abattement pour durée de détention.</li>
+        <li>Les moins-values de cession s'imputent sur les plus-values de l'année puis des 10 années suivantes.</li>
+      </ul></div></details>
+      <details><summary>Les contributions sur les hauts revenus</summary><div class="prose" style="margin-top:8px"><ul>
+        <li><b>CEHR</b> : 3 % du revenu fiscal de référence entre 250 000 € et 500 000 € (personne seule), 4 % au-delà ; seuils doublés pour un couple. Lissage possible si votre RFR augmente brusquement (CGI 223 sexies II).</li>
+        <li><b>CDHR</b> : si votre RFR dépasse 250 000 € (500 000 € pour un couple), vos impôts doivent atteindre au moins 20 % de ce revenu (CGI 224, applicable aux revenus 2025 et, dans sa version LF 2026, aux revenus 2026). L'abattement de 50 % sur le gain d'acquisition est exclu de la base.</li>
+      </ul></div></details>
+      <details><summary>Ce que le simulateur ne fait pas</summary><div class="prose" style="margin-top:8px"><ul>
+        <li>Le barème 2026 n'est pas encore voté (loi de finances pour 2027 en discussion) : le barème des revenus 2025 est reconduit.</li>
+        <li>Aucune réduction ou crédit d'impôt, ni la règle des revenus exceptionnels de la CDHR (quart du montant), ni l'abattement fixe des dirigeants de PME partant à la retraite.</li>
+        <li>Mobilité internationale : seule la fraction française du gain d'acquisition est imposée ici. La part étrangère peut rester prise en compte pour le taux effectif ; faites valider le calcul.</li>
+        <li>Le seuil de 300 000 € est attribué aux lots par ordre de date de vesting.</li>
+        <li>Plan non qualifié : le gain de vesting n'est compté que si le vesting a lieu l'année simulée. Les cotisations sont un taux moyen que vous saisissez.</li>
+        <li>La CSG déductible (6,8 points, au prorata de la part imposée) réduit votre impôt de l'année suivante : elle est indiquée à part, pas déduite du total.</li>
+        <li>Le choix du lot vendu suppose que votre courtier identifie les lots. Faites confirmer cette méthode si vous détenez d'autres actions de la même société.</li>
+      </ul></div></details>
+      <details><summary>Sources</summary><div class="prose" style="margin-top:8px"><ul>
+        <li><a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000042340496" target="_blank" rel="noopener">CGI art. 80 quaterdecies</a> · <a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000053546896" target="_blank" rel="noopener">CGI art. 200 A</a> · <a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000053542636" target="_blank" rel="noopener">CGI art. 197 (barème)</a> · <a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000036427364" target="_blank" rel="noopener">CGI art. 223 sexies</a> · <a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000053561826" target="_blank" rel="noopener">CGI art. 224</a></li>
+        <li><a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000051218166" target="_blank" rel="noopener">CSS L136-6</a> · <a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000054336623" target="_blank" rel="noopener">CSS L136-8 (taux de CSG)</a> · <a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000053278796" target="_blank" rel="noopener">CSS L137-14 (contribution salariale)</a> · <a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000054336634" target="_blank" rel="noopener">CGI art. 154 quinquies (CSG déductible)</a></li>
+        <li><a href="https://librejustice.fr/norm/fr/rsa-actionnariat-salarie-attribution-d-actions-gratuites-regime-fiscal-au-regard" target="_blank" rel="noopener">BOFiP BOI-RSA-ES-20-20-20</a>, actions gratuites, régime des bénéficiaires (mis à jour le 21/05/2026)</li>
+      </ul></div></details>
+      <p class="muted">Cet outil donne une estimation, pas un conseil fiscal personnalisé. Pour une décision importante, faites valider votre situation par un avocat fiscaliste ou un expert-comptable.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+// ===== Moteur fiscal RSU / actions gratuites — résident fiscal français =====
+// Sources : CGI art. 80 quaterdecies, 150-0 D, 154 quinquies, 197, 200 A, 223 sexies, 224, 235 ter, 1417 ;
+// CSS art. L136-6, L136-8, L137-13, L137-14 ; BOI-RSA-ES-20-20-20 (MAJ 21/05/2026).
+const PARAMS = {
+  2025: {
+    label: "Revenus 2025 (déclarés en 2026)",
+    bareme: [[11600, 0.11], [29579, 0.30], [84577, 0.41], [181917, 0.45]],
+    qfDemiPart: 1807, decoteSeul: 897, decoteCouple: 1483, decoteTaux: 0.4525,
+    psPatrimoine: 0.186, csgActivite: 0.092, crds: 0.005, contribSalariale: 0.10,
+    csgDeductible: 0.068, pfuIR: 0.128, seuilAGA: 300000, cdhr: true, provisoire: false
+  },
+  2026: {
+    label: "Revenus 2026 (déclarés en 2027)",
+    // Barème 2026 non encore voté (PLF 2027 en discussion) : barème des revenus 2025 reconduit, modifiable.
+    bareme: [[11600, 0.11], [29579, 0.30], [84577, 0.41], [181917, 0.45]],
+    qfDemiPart: 1807, decoteSeul: 897, decoteCouple: 1483, decoteTaux: 0.4525,
+    psPatrimoine: 0.186, csgActivite: 0.092, crds: 0.005, contribSalariale: 0.10,
+    csgDeductible: 0.068, pfuIR: 0.128, seuilAGA: 300000, cdhr: true, provisoire: true
+  }
+};
+
+const REGIMES = {
+  Q18: "Qualifié — AGE après le 31/12/2017",
+  Q17: "Qualifié — AGE du 31/12/2016 au 31/12/2017",
+  Q15: "Qualifié — AGE du 08/08/2015 au 30/12/2016",
+  Q12: "Qualifié — attribution dès le 28/09/2012, AGE avant le 08/08/2015",
+  NQ: "Non qualifié (plan US sans sous-plan français)"
+};
+
+function baremeParPart(q, bareme) {
+  let t = 0;
+  for (let i = 0; i < bareme.length; i++) {
+    const lo = bareme[i][0], hi = i + 1 < bareme.length ? bareme[i + 1][0] : Infinity;
+    if (q > lo) t += (Math.min(q, hi) - lo) * bareme[i][1];
+  }
+  return t;
+}
+
+function tmi(R, parts, bareme) {
+  const q = R / parts;
+  let r = 0;
+  for (const [lo, rate] of bareme) if (q > lo) r = rate;
+  return r;
+}
+
+// Impôt au barème : quotient familial plafonné + décote (CGI art. 197)
+function impotBareme(R, parts, couple, P) {
+  R = Math.max(0, R);
+  const base = couple ? 2 : 1;
+  const t1 = parts * baremeParPart(R / parts, P.bareme);
+  const t2 = base * baremeParPart(R / base, P.bareme);
+  const demiParts = Math.max(0, (parts - base) * 2);
+  let tax = Math.max(t1, t2 - demiParts * P.qfDemiPart);
+  const lim = couple ? P.decoteCouple : P.decoteSeul;
+  const decote = Math.max(0, lim - P.decoteTaux * tax);
+  tax -= Math.min(tax, decote);
+  return tax;
+}
+
+// CEHR (CGI art. 223 sexies), avec mécanisme de lissage du II
+function cehrBrute(rfr, couple) {
+  const s1 = couple ? 500000 : 250000, s2 = couple ? 1000000 : 500000;
+  return 0.03 * Math.max(0, Math.min(rfr, s2) - s1) + 0.04 * Math.max(0, rfr - s2);
+}
+function cehr(rfr, couple, n1, n2) {
+  const seuil = couple ? 500000 : 250000;
+  if (n1 > 0 && n2 > 0 && n1 <= seuil && n2 <= seuil) {
+    const moy = (n1 + n2) / 2;
+    if (rfr >= 1.5 * moy) {
+      const lisse = moy + (rfr - moy) / 2;
+      return cehrBrute(moy, couple) + 2 * (cehrBrute(lisse, couple) - cehrBrute(moy, couple));
+    }
+  }
+  return cehrBrute(rfr, couple);
+}
+
+// CDHR (CGI art. 224) : imposition minimale de 20 % des hauts revenus
+function cdhr(baseCdhr, impotsRetenus, couple, pac) {
+  const seuil = couple ? 500000 : 250000, haut = couple ? 660000 : 330000;
+  if (baseCdhr <= seuil) return 0;
+  let m = 0.2 * baseCdhr;
+  if (baseCdhr <= haut) m = Math.min(m, 0.825 * (baseCdhr - seuil));
+  const deduction = impotsRetenus + 1500 * pac + (couple ? 12500 : 0);
+  return Math.max(0, m - deduction);
+}
+
+function anneesDetention(dAcq, dVente) {
+  const a = new Date(dAcq), v = new Date(dVente);
+  if (isNaN(a) || isNaN(v)) return 0;
+  let y = v.getFullYear() - a.getFullYear();
+  if (v.getMonth() < a.getMonth() || (v.getMonth() === a.getMonth() && v.getDate() < a.getDate())) y--;
+  return y;
+}
+function abattementDuree(dAcq, dVente) {
+  const y = anneesDetention(dAcq, dVente);
+  return y >= 8 ? 0.65 : y >= 2 ? 0.5 : 0;
+}
+
+// Calcul du foyer : impôt sur le revenu, PFU, CEHR, CDHR
+function foyerImpots(f, P, revBareme, pfuBase, abatt50, abatt1ter) {
+  const ir = impotBareme(revBareme, f.parts, f.couple, P);
+  const pfuIR = pfuBase * P.pfuIR;
+  const rfr = revBareme + abatt50 + abatt1ter + pfuBase;
+  const c1 = cehr(rfr, f.couple, +f.rfrN1 || 0, +f.rfrN2 || 0);
+  const c2 = P.cdhr ? cdhr(rfr - abatt50, ir + pfuIR + c1, f.couple, f.pac) : 0;
+  return { ir, pfuIR, cehr: c1, cdhr: c2, rfr, total: ir + pfuIR + c1 + c2, tmi: (impotBareme(revBareme + 100, f.parts, f.couple, P) - ir) / 100 };
+}
+
+// Évalue une cession : qtys[i] = nombre d'actions vendues dans le lot i
+function evaluer(S, qtys, opts = {}) {
+  const f = S.foyer, v = S.vente, P = Object.assign({}, PARAMS[f.annee], S.surcharges || {});
+  const annee = +f.annee;
+  const totalQ = qtys.reduce((a, b) => a + b, 0);
+  const fraisParAction = totalQ > 0 ? (+v.frais || 0) / totalQ : 0;
+  const prixNetEUR = ((+v.prix || 0) - fraisParAction) / (+v.fx || 1);
+  const deduc = f.deduc10 ? 0.9 : 1;
+  const r = {
+    P, prixNetEUR, totalQ, produit: 0, lots: [], alertes: [],
+    bareme: 0, abatt50: 0, abatt1ter: 0, basePatrimoine: 0, baseActivite: 0, baseContrib: 0,
+    cotisNQ: 0, gainNQ: 0, pvSomme: 0, csgDedN1: 0
+  };
+  let reste300 = P.seuilAGA;
+  const ordre = S.lots.map((l, i) => i).sort((a, b) => String(S.lots[a].dateAcq).localeCompare(String(S.lots[b].dateAcq)));
+  for (const i of ordre) {
+    const l = S.lots[i], q = qtys[i] || 0;
+    const fmvEUR = (+l.fmv || 0) / (+l.fx || 1), src = Math.min(1, Math.max(0, (+l.src || 0) / 100));
+    const produit = q * prixNetEUR, gainBrut = q * fmvEUR, pv = produit - gainBrut;
+    r.produit += produit;
+    const d = { i, nom: l.nom, regime: l.regime, q, fmvEUR, produit, gainBrut, pv, gainImpose: 0, abattement: 0, imposableBareme: 0, patrimoine: 0, activite: 0 };
+    if (l.regime === "NQ") {
+      if (new Date(l.dateAcq).getFullYear() === annee) {
+        const G = (+l.qte || 0) * fmvEUR * src;
+        const cot = G * (+f.tauxCotisNQ || 0) / 100;
+        const imposable = (G - cot + G * 0.9825 * 0.029) * deduc;
+        r.gainNQ += G; r.cotisNQ += cot; r.bareme += imposable;
+        d.salaireNQ = G; d.imposableBareme = imposable;
+        r.csgDedN1 += 0; // CSG d'activité déduite directement via la paie
+      }
+      r.pvSomme += pv; // plus ou moins-value de droit commun
+    } else {
+      const gainNet = Math.max(0, gainBrut + Math.min(0, pv)); // CGI 80 quaterdecies V
+      const pvPos = Math.max(0, pv);
+      r.pvSomme += pvPos;
+      const g = gainNet * src;
+      d.gainImpose = g; d.mvImputee = Math.min(gainBrut, Math.max(0, -pv));
+      if (l.regime === "Q18" || l.regime === "Q17") {
+        const bas = Math.min(g, reste300); reste300 -= bas; const haut = g - bas;
+        let a = 0.5;
+        if (l.regime === "Q17") a = abattementDuree(l.dateAcq, v.date);
+        const abat = bas * a;
+        if (l.regime === "Q18") r.abatt50 += abat; else r.abatt1ter += abat;
+        r.bareme += bas - abat + haut * deduc;
+        r.basePatrimoine += bas; r.baseActivite += haut; r.baseContrib += haut;
+        r.csgDedN1 += P.csgDeductible * (bas - abat) + P.csgDeductible * haut;
+        Object.assign(d, { abattement: abat, tauxAbat: a, sous300: bas, sur300: haut, imposableBareme: bas - abat + haut * deduc, patrimoine: bas, activite: haut });
+      } else if (l.regime === "Q15") {
+        const a = abattementDuree(l.dateAcq, v.date), abat = g * a;
+        r.abatt1ter += abat; r.bareme += g - abat; r.basePatrimoine += g;
+        r.csgDedN1 += P.csgDeductible * (g - abat);
+        Object.assign(d, { abattement: abat, tauxAbat: a, imposableBareme: g - abat, patrimoine: g });
+      } else if (l.regime === "Q12") {
+        r.bareme += g * deduc; r.baseActivite += g; r.baseContrib += g; r.csgDedN1 += P.csgDeductible * g;
+        Object.assign(d, { imposableBareme: g * deduc, activite: g });
+      }
+      if (q > 0 && l.conservOk === false)
+        r.alertes.push(`Lot « ${l.nom} » : cession avant la fin de la période de conservation. Le BOFiP (BOI-RSA-ES-20-20-20 § 10) impose alors le gain selon les règles de droit commun des salaires : le calcul ci-dessous est trop favorable.`);
+    }
+    if (q > (+l.qte || 0)) r.alertes.push(`Lot « ${l.nom} » : vous vendez plus d'actions (${q}) que vous n'en détenez (${l.qte}).`);
+    r.lots.push(d);
+  }
+  r.lots.sort((a, b) => a.i - b.i);
+  const mvDispo = +f.mvReport || 0;
+  r.pvNette = Math.max(0, r.pvSomme - mvDispo);
+  r.mvRestante = Math.max(0, mvDispo - Math.max(0, r.pvSomme));
+  r.mvNouvelle = Math.max(0, -r.pvSomme);
+
+  const autres = +f.autresPFU || 0;
+  const base = foyerImpots(f, P, +f.revenu || 0, autres, 0, 0);
+  const avecPFU = foyerImpots(f, P, (+f.revenu || 0) + r.bareme, autres + r.pvNette, r.abatt50, r.abatt1ter);
+  const avecBar = foyerImpots(f, P, (+f.revenu || 0) + r.bareme + r.pvNette + autres, 0, r.abatt50, r.abatt1ter);
+  let option = v.pvOption;
+  const socialFixe = r.basePatrimoine * P.psPatrimoine + r.baseActivite * (P.csgActivite + P.crds) + r.baseContrib * P.contribSalariale + r.cotisNQ;
+  const psPV = r.pvNette * P.psPatrimoine;
+  if (option === "auto") option = avecBar.total <= avecPFU.total ? "bareme" : "pfu";
+  const avec = option === "bareme" ? avecBar : avecPFU;
+  r.option = option; r.base = base; r.avec = avec; r.avecPFU = avecPFU; r.avecBar = avecBar;
+  if (option === "bareme") r.csgDedN1 += P.csgDeductible * r.pvNette;
+
+  r.lignes = [
+    { id: "ir", lib: "Impôt sur le revenu (barème progressif)", assiette: r.bareme + (option === "bareme" ? r.pvNette : 0), montant: avec.ir - base.ir, ref: "CGI art. 197, 200 A-3" },
+    { id: "pfu", lib: "Impôt forfaitaire 12,8 % sur la plus-value (PFU)", montant: avec.pfuIR - base.pfuIR, ref: "CGI art. 200 A-1" },
+    { id: "psp", lib: `Prélèvements sociaux patrimoine ${pct(P.psPatrimoine)} — gain ≤ 300 k€`, assiette: r.basePatrimoine, montant: r.basePatrimoine * P.psPatrimoine, ref: "CSS L136-6 I-e, L136-8 ; CGI 235 ter" },
+    { id: "pspv", lib: `Prélèvements sociaux ${pct(P.psPatrimoine)} — plus-value de cession`, assiette: r.pvNette, montant: psPV, ref: "CSS L136-6 I-e" },
+    { id: "act", lib: `CSG/CRDS revenus d'activité ${pct(P.csgActivite + P.crds)} — gain > 300 k€ ou ancien régime`, assiette: r.baseActivite, montant: r.baseActivite * (P.csgActivite + P.crds), ref: "CSS L136-1-1, L136-8" },
+    { id: "csal", lib: "Contribution salariale 10 %", assiette: r.baseContrib, montant: r.baseContrib * P.contribSalariale, ref: "CSS L137-14" },
+    { id: "nq", lib: "Cotisations sociales salariales (plan non qualifié, via la paie)", assiette: r.gainNQ, montant: r.cotisNQ, ref: "Salaire de droit commun" },
+    { id: "cehr", lib: "Contribution exceptionnelle sur les hauts revenus", montant: avec.cehr - base.cehr, ref: "CGI art. 223 sexies" },
+    { id: "cdhr", lib: "Contribution différentielle (taux minimal 20 %)", montant: avec.cdhr - base.cdhr, ref: "CGI art. 224" }
+  ];
+  r.totalImpots = r.lignes.reduce((a, l) => a + l.montant, 0);
+  r.net = r.produit - r.totalImpots;
+  r.tauxGlobal = r.produit > 0 ? r.totalImpots / r.produit : 0;
+  r.economieN1 = r.csgDedN1 * avec.tmi;
+  return r;
+}
+
+function pct(x) { return (Math.round(x * 1000) / 10).toString().replace(".", ",") + " %"; }
+
+// Courbe : impôts et net en fonction du nombre d'actions cédées (ordre glouton le moins taxé)
+function courbe(S, nbPoints = 60) {
+  const dispo = S.lots.map(l => Math.max(0, Math.floor(+l.qte || 0)));
+  const total = dispo.reduce((a, b) => a + b, 0);
+  const pas = Math.max(1, Math.ceil(total / nbPoints));
+  const q = dispo.map(() => 0);
+  const base = evaluer(S, q);
+  const pts = [{ n: 0, impots: base.totalImpots, net: base.net, produit: 0, q: q.slice(), marg: 0 }];
+  let n = 0;
+  while (n < total) {
+    let best = -1, bestScore = Infinity, bestR = null, bestK = 0;
+    for (let i = 0; i < dispo.length; i++) {
+      const k = Math.min(pas, dispo[i] - q[i]);
+      if (k <= 0) continue;
+      q[i] += k;
+      const r = evaluer(S, q);
+      q[i] -= k;
+      const prev = pts[pts.length - 1];
+      const dProd = r.produit - prev.produit;
+      const s2 = dProd > 0 ? (r.totalImpots - prev.impots) / dProd : Infinity;
+      if (s2 < bestScore) { bestScore = s2; best = i; bestR = r; bestK = k; }
+    }
+    if (best < 0) break;
+    q[best] += bestK; n += bestK;
+    pts.push({ n, impots: bestR.totalImpots, net: bestR.net, produit: bestR.produit, q: q.slice(), marg: bestScore });
+  }
+  return pts;
+}
+
+// Nombre minimal d'actions pour atteindre un montant net donné
+function pourNet(S, cible) {
+  const pts = courbe(S, 120);
+  const idx = pts.findIndex(p => p.net >= cible);
+  if (idx < 0) return { atteignable: false, max: pts[pts.length - 1] };
+  if (idx === 0) return { atteignable: true, point: pts[0], q: pts[0].q };
+  // affinage action par action entre deux points
+  const a = pts[idx - 1], b = pts[idx];
+  const q = a.q.slice();
+  const diff = b.q.map((x, i) => x - a.q[i]);
+  const lot = diff.findIndex(x => x > 0);
+  for (let k = 1; k <= diff[lot]; k++) {
+    q[lot] = a.q[lot] + k;
+    const r = evaluer(S, q);
+    if (r.net >= cible) return { atteignable: true, q: q.slice(), r };
+  }
+  return { atteignable: true, q: b.q, r: evaluer(S, b.q) };
+}
+
+// Étalement des cessions sur plusieurs années (hypothèses constantes)
+function etalement(S, qtys, maxAns = 4) {
+  const res = [];
+  for (let n = 1; n <= maxAns; n++) {
+    let total = 0, produit = 0;
+    for (let y = 0; y < n; y++) {
+      const qy = qtys.map(x => Math.floor(x / n) + (y < x % n ? 1 : 0));
+      const S2 = JSON.parse(JSON.stringify(S));
+      if (y > 0) S2.lots.forEach(l => { if (l.regime === "NQ") l.dateAcq = "1900-01-01"; });
+      const r = evaluer(S2, qy);
+      total += r.totalImpots; produit += r.produit;
+    }
+    res.push({ n, impots: total, produit, net: produit - total });
+  }
+  return res;
+}
+
+// Nombre d'actions cessibles avant d'atteindre le seuil annuel de 300 000 €
+function capacite300(S) {
+  const P = PARAMS[S.foyer.annee];
+  const prixNetEUR = (+S.vente.prix || 0) / (+S.vente.fx || 1);
+  let reste = P.seuilAGA; const out = [];
+  const ordre = S.lots.map((l, i) => i).filter(i => S.lots[i].regime === "Q18" || S.lots[i].regime === "Q17")
+    .sort((a, b) => String(S.lots[a].dateAcq).localeCompare(String(S.lots[b].dateAcq)));
+  for (const i of ordre) {
+    const l = S.lots[i];
+    const g = Math.min((+l.fmv || 0) / (+l.fx || 1), prixNetEUR) * ((+l.src || 0) / 100);
+    const n = g > 0 ? Math.min(+l.qte || 0, Math.floor(reste / g)) : +l.qte || 0;
+    reste -= n * g; out.push({ i, nom: l.nom, n, gainParAction: g });
+  }
+  return out;
+}
+
+if (typeof module !== "undefined") module.exports = { evaluer, courbe, pourNet, etalement, capacite300, impotBareme, cehr, cdhr, PARAMS };
+
+</script>
+<script>
+const eur = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+const nb = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 });
+const fmt = x => eur.format(Math.round(x || 0));
+const STORE = "rsu-fr-v1";
+const EXEMPLE = {
+  foyer: { annee: "2026", couple: true, parts: 3, pac: 2, revenu: 140000, autresPFU: 2000, mvReport: 0, rfrN1: 0, rfrN2: 0, tauxCotisNQ: 20, deduc10: false },
+  vente: { date: "2026-11-16", prix: 245, fx: 1.16, frais: 25, pvOption: "auto" },
+  lots: [
+    { nom: "Vesting mars 2024", regime: "Q18", dateAcq: "2024-03-15", qte: 400, vendre: 400, fmv: 180, fx: 1.09, src: 100, conservOk: true },
+    { nom: "Vesting mars 2025", regime: "Q18", dateAcq: "2025-03-15", qte: 400, vendre: 400, fmv: 215, fx: 1.08, src: 100, conservOk: true },
+    { nom: "Vesting sept. 2025", regime: "Q18", dateAcq: "2025-09-15", qte: 350, vendre: 0, fmv: 260, fx: 1.17, src: 100, conservOk: true }
+  ]
+};
+let S;
+let estExemple = true;
+try { const raw = localStorage.getItem(STORE); if (raw) { S = JSON.parse(raw); estExemple = false; } } catch (e) {}
+if (!S || !S.lots) S = JSON.parse(JSON.stringify(EXEMPLE));
+
+function sauver() { estExemple = false; document.getElementById("ex-badge").hidden = true; try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }
+function getK(path) { return path.split(".").reduce((o, k) => o[k], S); }
+function setK(path, val) { const ks = path.split("."); const last = ks.pop(); ks.reduce((o, k) => o[k], S)[last] = val; }
+
+function lireInput(el) {
+  if (el.dataset.type === "check") return el.checked;
+  if (el.dataset.type === "bool") return el.value === "true";
+  if (el.type === "number") return el.value === "" ? 0 : +el.value;
+  return el.value;
+}
+function bindStatic() {
+  document.querySelectorAll("[data-k]").forEach(el => {
+    const v = getK(el.dataset.k);
+    if (el.dataset.type === "check") el.checked = !!v; else el.value = String(v);
+    el.addEventListener("input", () => { setK(el.dataset.k, lireInput(el)); sauver(); recalc(); });
+  });
+  document.getElementById("ex-badge").hidden = !estExemple;
+}
+
+function renderLots() {
+  const box = document.getElementById("lots");
+  box.innerHTML = "";
+  S.lots.forEach((l, i) => {
+    const d = document.createElement("div");
+    d.className = "lot";
+    const opts = Object.entries(REGIMES).map(([k, v]) => `<option value="${k}"${k === l.regime ? " selected" : ""}>${v}</option>`).join("");
+    d.innerHTML = `
+      <div class="lot-head"><input id="lot-${i}-nom" aria-label="Nom du lot" data-f="nom" value="${String(l.nom).replace(/"/g, "&quot;")}"><button type="button" class="danger small" data-del="${i}">Retirer</button></div>
+      <div class="fields">
+        <label class="f wide"><span class="l">Régime du plan</span><select id="lot-${i}-regime" data-f="regime">${opts}</select></label>
+        <label class="f"><span class="l">Date du vesting</span><input id="lot-${i}-date" type="date" data-f="dateAcq" value="${l.dateAcq}"></label>
+        <label class="f"><span class="l">Actions détenues</span><input id="lot-${i}-qte" type="number" min="0" step="1" data-f="qte" value="${l.qte}"></label>
+        <label class="f"><span class="l">Cours au vesting ($)</span><input id="lot-${i}-fmv" type="number" min="0" step="0.01" data-f="fmv" value="${l.fmv}"></label>
+        <label class="f"><span class="l">Taux $ pour 1 € au vesting</span><input id="lot-${i}-fx" type="number" min="0" step="0.0001" data-f="fx" value="${l.fx}"></label>
+        <label class="f"><span class="l">Actions à vendre</span><input id="lot-${i}-vendre" type="number" min="0" step="1" data-f="vendre" value="${l.vendre}"></label>
+        <label class="f"><span class="l">Part française du gain (%)</span><input id="lot-${i}-src" type="number" min="0" max="100" step="1" data-f="src" value="${l.src}"><small>100 % sans mobilité internationale</small></label>
+        <label class="chk wide"><input id="lot-${i}-cons" type="checkbox" data-f="conservOk"${l.conservOk !== false ? " checked" : ""}><span>Période de conservation terminée (acquisition + conservation d'au moins 2 ans au total pour un plan qualifié)</span></label>
+        <p class="calc-hint wide" id="lot-${i}-hint"></p>
+      </div>`;
+    d.querySelectorAll("[data-f]").forEach(el => el.addEventListener("input", () => {
+      const k = el.dataset.f;
+      l[k] = el.type === "checkbox" ? el.checked : el.type === "number" ? (el.value === "" ? 0 : +el.value) : el.value;
+      sauver(); recalc();
+    }));
+    d.querySelector("[data-del]").addEventListener("click", () => { S.lots.splice(i, 1); sauver(); renderLots(); recalc(); });
+    box.appendChild(d);
+  });
+}
+document.getElementById("add-lot").addEventListener("click", () => {
+  const last = S.lots[S.lots.length - 1];
+  S.lots.push({ nom: "Nouveau lot", regime: last ? last.regime : "Q18", dateAcq: "2026-03-15", qte: 100, vendre: 0, fmv: 200, fx: 1.15, src: 100, conservOk: true });
+  sauver(); renderLots(); recalc();
+});
+
+function qtysCourantes() { return S.lots.map(l => Math.max(0, Math.floor(+l.vendre || 0))); }
+
+function recalc() {
+  const r = evaluer(S, qtysCourantes());
+  const P = r.P;
+  document.getElementById("res-year").textContent = P.label;
+  document.getElementById("t-produit").textContent = fmt(r.produit);
+  document.getElementById("t-impots").textContent = fmt(r.totalImpots);
+  document.getElementById("t-net").textContent = fmt(r.net);
+  document.getElementById("t-taux").textContent = r.produit > 0 ? (r.tauxGlobal * 100).toFixed(1).replace(".", ",") + " %" : "—";
+
+  const tb = document.querySelector("#tab-lignes tbody");
+  tb.innerHTML = r.lignes.filter(l => Math.abs(l.montant) >= 0.5 || l.id === "ir").map(l => `<tr><td>${l.lib}<span class="ref">${l.ref}</span></td><td class="n">${l.assiette != null ? fmt(l.assiette) : ""}</td><td class="n">${fmt(l.montant)}</td></tr>`).join("")
+    + `<tr class="total"><td>Total</td><td></td><td class="n">${fmt(r.totalImpots)}</td></tr>`;
+
+  const tl = document.querySelector("#tab-lots tbody");
+  tl.innerHTML = r.lots.map(d => `<tr><td>${esc(d.nom)}<span class="ref">${REGIMES[d.regime]}</span></td><td class="n">${nb.format(d.q)}</td><td class="n">${d.regime === "NQ" ? (d.salaireNQ ? fmt(d.salaireNQ) + "*" : "déjà imposé") : fmt(d.gainImpose)}</td><td class="n">${fmt(d.pv)}</td><td class="n">${d.abattement ? fmt(d.abattement) : "—"}</td><td class="n">${fmt(d.imposableBareme)}</td></tr>`).join("");
+
+  r.lots.forEach(d => {
+    const h = document.getElementById(`lot-${d.i}-hint`);
+    if (h) h.textContent = `Cours au vesting en euros : ${d.fmvEUR.toFixed(2).replace(".", ",")} € · prix net de vente ${r.prixNetEUR.toFixed(2).replace(".", ",")} € · plus-value par action ${(r.prixNetEUR - d.fmvEUR).toFixed(2).replace(".", ",")} €`;
+  });
+
+  notes(r);
+  optimisation(r);
+}
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+function notes(r) {
+  const P = r.P, out = [];
+  r.alertes.forEach(a => out.push(["bad", a]));
+  if (P.provisoire) out.push(["warn", "<b>Barème 2026 provisoire.</b> La loi de finances pour 2027 qui fixera le barème des revenus 2026 n'est pas encore votée : le barème des revenus 2025 est reconduit."]);
+  const sur300 = r.lots.reduce((a, d) => a + (d.sur300 || 0), 0);
+  if (sur300 > 0) out.push(["warn", `<b>${fmt(sur300)} de gain dépasse le seuil annuel de 300 000 €.</b> Cette part perd l'abattement de 50 % et supporte 9,7 % de CSG/CRDS plus 10 % de contribution salariale. Reporter une partie des ventes à l'année suivante peut l'éviter.`]);
+  if (r.avec.cehr - r.base.cehr > 0) out.push(["warn", `<b>La vente déclenche ${fmt(r.avec.cehr - r.base.cehr)} de CEHR</b> (revenu fiscal de référence : ${fmt(r.avec.rfr)}). Si vos deux RFR précédents étaient sous le seuil, renseignez-les dans les réglages avancés pour bénéficier du lissage.`]);
+  if (r.avec.cdhr - r.base.cdhr > 0) out.push(["warn", `<b>Contribution différentielle de ${fmt(r.avec.cdhr - r.base.cdhr)}.</b> Vos impôts n'atteignent pas 20 % de votre revenu : étaler les ventes peut la réduire.`]);
+  if (r.pvNette > 0) {
+    const d = r.avecBar.total - r.avecPFU.total;
+    out.push(["", `<b>Plus-value :</b> ${r.option === "pfu" ? "le prélèvement forfaitaire" : "l'option pour le barème"} est retenu. ${Math.abs(d) < 1 ? "Les deux options coûtent la même chose." : `L'autre option coûterait ${fmt(Math.abs(d))} de ${d > 0 === (r.option === "pfu") ? "plus" : "moins"}.`} Votre taux marginal d'imposition (quotient familial plafonné compris) est de ${Math.round(r.avec.tmi * 100)} %.`]);
+  }
+  if (r.mvNouvelle > 0) out.push(["", `Moins-value nette de ${fmt(r.mvNouvelle)} sur les lots non qualifiés : imputable sur vos plus-values des 10 prochaines années.`]);
+  if (r.economieN1 > 1) out.push(["", `<b>CSG déductible :</b> environ ${fmt(r.csgDedN1)} viendront en déduction de votre revenu imposable de l'année suivante, soit une économie d'environ ${fmt(r.economieN1)} à votre taux marginal actuel.`]);
+  if (r.produit > 0) out.push(["", `<b>Trésorerie :</b> l'impôt sur le gain et la plus-value d'un plan qualifié est liquidé après votre déclaration de revenus de l'année suivante, avec les prélèvements sociaux et la contribution salariale. Mettez de côté ${fmt(r.totalImpots)} dès la vente.`]);
+  out.push(["", "Un compte titres ouvert chez un courtier américain (Morgan Stanley, Schwab, Fidelity, E*Trade…) se déclare chaque année avec le formulaire n° 3916 (CGI art. 1649 A)."]);
+  document.getElementById("notes").innerHTML = out.map(([c, t]) => `<div class="note ${c}">${t}</div>`).join("");
+}
+
+let derniereCible = null;
+function optimisation(r) {
+  const pts = courbe(S, 70);
+  dessiner(pts, r);
+  // objectif net
+  const cible = +document.getElementById("o-cible").value || 0;
+  const res = pourNet(S, cible);
+  const box = document.getElementById("o-cible-res");
+  if (!res.atteignable) {
+    derniereCible = null;
+    box.innerHTML = `<p>Même en vendant tout, le net atteint ${fmt(res.max.net)}.</p>`;
+  } else {
+    derniereCible = res.q;
+    const rr = res.r || evaluer(S, res.q);
+    const n = res.q.reduce((a, b) => a + b, 0);
+    box.innerHTML = `<p class="big">${nb.format(n)} actions</p><p class="muted">${res.q.map((x, i) => x ? `${nb.format(x)} du lot « ${esc(S.lots[i].nom)} »` : "").filter(Boolean).join(", ") || "Aucune vente"}. Net ${fmt(rr.net)} pour ${fmt(rr.totalImpots)} d'impôts.</p>`;
+  }
+  // 300k
+  const cap = capacite300(S);
+  const b3 = document.getElementById("o-300");
+  if (!cap.length) b3.innerHTML = `<p class="muted">Aucun lot soumis au seuil de 300 000 € (plans d'AGE à partir du 31/12/2016).</p>`;
+  else {
+    const tot = cap.reduce((a, c) => a + c.n, 0);
+    b3.innerHTML = `<p class="big">${nb.format(tot)} actions</p><p class="muted">au plus cette année, au prix actuel, avant que le gain d'acquisition dépasse 300 000 € : ${cap.map(c => `${nb.format(c.n)} du lot « ${esc(c.nom)} »`).join(", ")}. Le seuil repart à zéro chaque 1er janvier.</p>`;
+  }
+  // étalement
+  const et = etalement(S, qtysCourantes(), 4);
+  const be = document.getElementById("o-etal");
+  if (!r.totalQ) be.innerHTML = `<p class="muted">Indiquez des actions à vendre pour comparer.</p>`;
+  else be.innerHTML = `<div class="scroll"><table><thead><tr><th>Sur</th><th class="n">Impôts</th><th class="n">Écart</th></tr></thead><tbody>${et.map(e => `<tr><td>${e.n} an${e.n > 1 ? "s" : ""}</td><td class="n">${fmt(e.impots)}</td><td class="n">${e.n === 1 ? "—" : fmt(e.impots - et[0].impots)}</td></tr>`).join("")}</tbody></table></div><p class="muted" style="font-size:13px">Même cours, mêmes revenus et mêmes règles chaque année. Attendre expose au risque de baisse du cours et au change.</p>`;
+}
+document.getElementById("o-cible").addEventListener("input", () => recalc());
+document.getElementById("o-apply").addEventListener("click", () => {
+  if (!derniereCible) return;
+  S.lots.forEach((l, i) => l.vendre = derniereCible[i]);
+  sauver(); renderLots(); recalc();
+});
+
+function dessiner(pts, r) {
+  const svg = document.getElementById("chart");
+  const W = 900, H = 300, m = { l: 70, r: 20, t: 16, b: 36 };
+  const maxN = pts[pts.length - 1].n || 1;
+  const maxY = Math.max(1, ...pts.map(p => Math.max(p.net, p.impots)));
+  const step = niceStep(maxY / 4);
+  const top = Math.ceil(maxY / step) * step;
+  const x = n => m.l + (n / maxN) * (W - m.l - m.r);
+  const y = v => H - m.b - (v / top) * (H - m.t - m.b);
+  let g = "";
+  for (let v = 0; v <= top + 1; v += step) g += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${m.l - 8}" y="${y(v) + 4}" text-anchor="end">${abbr(v)}</text>`;
+  const xs = niceStep(maxN / 6);
+  for (let n = 0; n <= maxN; n += xs) g += `<text x="${x(n)}" y="${H - m.b + 18}" text-anchor="middle">${nb.format(n)}</text>`;
+  g += `<text x="${W - m.r}" y="${H - 4}" text-anchor="end">actions vendues</text>`;
+  // seuil 300k : premier point où une part du gain dépasse 300 k€
+  let seuilN = null;
+  for (const p of pts) { const rr = evaluer(S, p.q); if (rr.baseContrib > 0 && rr.lots.some(d => d.sur300 > 0)) { seuilN = p.n; break; } }
+  if (seuilN != null) g += `<line x1="${x(seuilN)}" x2="${x(seuilN)}" y1="${m.t}" y2="${H - m.b}" stroke="var(--muted)" stroke-dasharray="4 4" stroke-width="1"/><text x="${x(seuilN) + 6}" y="${m.t + 12}">300 k€</text>`;
+  const path = k => pts.map((p, i) => `${i ? "L" : "M"}${x(p.n).toFixed(1)},${y(p[k]).toFixed(1)}`).join("");
+  g += `<path d="${path("impots")}" fill="none" stroke="var(--s2)" stroke-width="2" stroke-linejoin="round"/>`;
+  g += `<path d="${path("net")}" fill="none" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round"/>`;
+  // position actuelle
+  const nCur = r.totalQ;
+  if (nCur > 0 && nCur <= maxN) g += `<circle cx="${x(nCur)}" cy="${y(r.net)}" r="5" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"/><circle cx="${x(nCur)}" cy="${y(r.totalImpots)}" r="5" fill="var(--s2)" stroke="var(--surface)" stroke-width="2"/>`;
+  const last = pts[pts.length - 1];
+  g += `<g id="hover" visibility="hidden"><line id="hx" y1="${m.t}" y2="${H - m.b}" stroke="var(--ink)" stroke-width="1" opacity=".35"/><circle id="h1" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"/><circle id="h2" r="4" fill="var(--s2)" stroke="var(--surface)" stroke-width="2"/></g>`;
+  g += `<rect x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent" id="hit"/>`;
+  svg.innerHTML = g;
+  const tip = document.getElementById("tip"), box = document.getElementById("chart-box");
+  const hit = svg.querySelector("#hit"), hov = svg.querySelector("#hover");
+  hit.addEventListener("pointermove", ev => {
+    const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
+    const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+    const n = (p.x - m.l) / (W - m.l - m.r) * maxN;
+    let best = pts[0]; for (const q of pts) if (Math.abs(q.n - n) < Math.abs(best.n - n)) best = q;
+    hov.setAttribute("visibility", "visible");
+    svg.querySelector("#hx").setAttribute("x1", x(best.n)); svg.querySelector("#hx").setAttribute("x2", x(best.n));
+    svg.querySelector("#h1").setAttribute("cx", x(best.n)); svg.querySelector("#h1").setAttribute("cy", y(best.net));
+    svg.querySelector("#h2").setAttribute("cx", x(best.n)); svg.querySelector("#h2").setAttribute("cy", y(best.impots));
+    const taux = best.produit > 0 ? ((best.impots / best.produit) * 100).toFixed(1).replace(".", ",") + " %" : "—";
+    tip.innerHTML = `${nb.format(best.n)} actions<br><span style="color:var(--s1)">●</span> Net ${fmt(best.net)}<br><span style="color:var(--s2)">●</span> Impôts ${fmt(best.impots)}<br>Taux global ${taux}<br>Taux marginal ${best.marg && isFinite(best.marg) ? (best.marg * 100).toFixed(1).replace(".", ",") + " %" : "—"}`;
+    tip.hidden = false;
+    const br = box.getBoundingClientRect();
+    let left = ev.clientX - br.left + 14; if (left + 190 > br.width) left = ev.clientX - br.left - 200;
+    tip.style.left = Math.max(0, left) + "px"; tip.style.top = Math.max(0, ev.clientY - br.top - 40) + "px";
+  });
+  hit.addEventListener("pointerleave", () => { hov.setAttribute("visibility", "hidden"); tip.hidden = true; });
+}
+function niceStep(v) { if (v <= 0) return 1; const p = Math.pow(10, Math.floor(Math.log10(v))); const f = v / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p; }
+function abbr(v) { return v >= 1e6 ? (v / 1e6).toFixed(1).replace(".", ",") + " M€" : v >= 1e3 ? Math.round(v / 1e3) + " k€" : Math.round(v) + " €"; }
+
+bindStatic();
+renderLots();
+recalc();
+</script>
+
+</body>
+</html>
