@@ -178,6 +178,27 @@ a { color: var(--accent); }
         <div class="row-actions"><button type="button" class="ghost" id="add-grant">Ajouter une attribution</button></div>
       </section>
 
+      <section class="panel" aria-labelledby="h-fx">
+        <div class="panel-head"><h2 id="h-fx">Taux de change</h2><span class="step">dollars pour 1 euro</span></div>
+        <p class="muted" style="font-size:14px">Chaque vesting et la cession ont déjà leur propre champ de taux, modifiable à la main. Si plusieurs vestings tombent les mêmes jours, saisissez ici les taux une seule fois (BCE ou Banque de France, ex. 1,0850), puis appliquez-les. Si le jour exact manque (week-end, jour férié), le dernier taux publié dans les 5 jours précédents est retenu.</p>
+        <div class="rel scroll"><table style="min-width:0">
+          <thead><tr><th>Date</th><th>$ pour 1 €</th><th>Utilisé par</th><th></th></tr></thead>
+          <tbody id="fx-rows"></tbody>
+        </table></div>
+        <div class="row-actions">
+          <button type="button" class="ghost small" id="fx-add">Ajouter un taux</button>
+          <button type="button" class="ghost small" id="fx-fill">Préremplir avec les dates des vestings</button>
+          <button type="button" class="ghost small" id="fx-paste-btn">Coller une liste</button>
+          <button type="button" class="small" id="fx-apply">Appliquer aux vestings et à la cession</button>
+        </div>
+        <div class="tool" id="fx-paste-tool" hidden>
+          <p class="muted" style="font-size:13px">Une ligne par jour : <span class="mono">date ; taux</span> (tabulation ou point-virgule, 15/03/2024 ou 2024-03-15, virgule ou point décimal).</p>
+          <textarea id="fx-paste" placeholder="15/03/2024;1,0892&#10;14/06/2024;1,0688"></textarea>
+          <div class="row-actions"><button type="button" class="small" id="fx-paste-ok">Ajouter ces taux</button></div>
+        </div>
+        <p class="muted" id="fx-msg" aria-live="polite" style="font-size:13px"></p>
+      </section>
+
       <section class="panel" aria-labelledby="h-vente">
         <div class="panel-head"><h2 id="h-vente">La cession envisagée</h2></div>
         <div class="fields">
@@ -435,7 +456,7 @@ function preparer(S) {
     const acqCourte = g.regime !== "NQ" && g.dateGrant && (new Date(rl.date) - new Date(g.dateGrant)) < (g.regime === "Q12" ? 2 : 1) * 365 * JOUR;
     lots.push({
       gi, ri, nom: `${g.nom} · ${formatDate(rl.date)}`, regime: g.regime, dateGrant: g.dateGrant, dateAcq: rl.date,
-      qte: +rl.qte || 0, fmv: +rl.fmv || 0, fx: +rl.fx || 1, vendre: +rl.vendre || 0, src: src * 100,
+      qte: +rl.qte || 0, fmv: +rl.fmv || 0, fx: +rl.fx > 0 ? +rl.fx : 1, fxManquant: !(+rl.fx > 0), vendre: +rl.vendre || 0, src: src * 100,
       cessible, conservOk: cessible ? new Date(S.vente.date) >= cessible : true, acqCourte
     });
   }));
@@ -450,6 +471,7 @@ function evaluer(S, qtys) {
   const totalQ = qtys.reduce((a, b) => a + b, 0);
   const fraisParAction = totalQ > 0 ? (+v.frais || 0) / totalQ : 0;
   const prixNetEUR = ((+v.prix || 0) - fraisParAction) / (+v.fx || 1);
+  const fxVenteManquant = !(+v.fx > 0);
   const deduc = f.deduc10 ? 0.9 : 1;
   const tauxCot = (+f.tauxCotisNQ || 0) / 100;
   const r = {
@@ -511,10 +533,12 @@ function evaluer(S, qtys) {
       }
     }
     if (q > 0 && l.acqCourte) r.alertes.push(`« ${l.nom} » : moins d'${l.regime === "Q12" ? "deux ans" : "un an"} entre l'attribution et le vesting, en dessous du minimum légal (C. com. L225-197-1). Vérifiez la date d'attribution : le plan pourrait ne pas être qualifié.`);
+    if ((q > 0 || d.salaireNQ) && l.fxManquant) r.alertes.push(`« ${l.nom} » : taux de change manquant. Saisissez-le dans le tableau des vestings ou dans la table des taux ; le calcul utilise 1 $ = 1 € en attendant.`);
     if (q > (+l.qte || 0)) r.alertes.push(`« ${l.nom} » : vous vendez ${q} actions alors que la release n'en compte que ${l.qte}.`);
     r.lots.push(d);
   }
   r.lots.sort((a, b) => a.i - b.i);
+  if (fxVenteManquant && totalQ > 0) r.alertes.push("Taux de change de la cession manquant : le calcul utilise 1 $ = 1 € en attendant.");
 
   // Plus-values : celles déjà réalisées dans l'année et les moins-values reportables s'imputent ensemble
   const mvDispo = +f.mvReport || 0, pvDeja = +f.pvDeja || 0;
@@ -832,7 +856,7 @@ function recalc() {
       const ri = l.ri, eurU = l.fmv / l.fx;
       tq += l.qte; tv += l.qte * eurU; tvd += l.vendre; pmin = Math.min(pmin, l.fmv); pmax = Math.max(pmax, l.fmv);
       const set = (id, h) => { const e = document.getElementById(`g${gi}-r${ri}-${id}`); if (e) e.innerHTML = h; };
-      set("eur", dec(eurU));
+      set("eur", l.fxManquant ? `<span class="chip lock">taux ?</span>` : dec(eurU));
       set("src", Math.round(l.src) + " %");
       set("cess", g.regime === "NQ" ? `<span class="chip ok">libre</span>` : l.conservOk ? `<span class="chip ok">oui</span>` : `<span class="chip lock" title="Vendable à partir du ${formatDate(l.cessible)}">dès ${formatDate(l.cessible)}</span>`);
     });
@@ -970,6 +994,80 @@ function abbr(v) { return v >= 1e6 ? dec(v / 1e6, 1) + " M€" : v >= 1e3 ? Math
 bindStatic();
 renderGrants();
 recalc();
+
+// ----- Table des taux de change saisis à la main -----
+if (!Array.isArray(S.taux)) S.taux = [];
+function lireDate(d) {
+  d = String(d || "").trim(); let m;
+  if ((m = d.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/))) d = `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+  return /^\d{4}-\d{2}-\d{2}$/.test(d) && !isNaN(new Date(d)) ? d : null;
+}
+function lireNombre(s) { const x = parseFloat(String(s || "").replace(/\s| /g, "").replace(",", ".")); return isNaN(x) ? null : x; }
+// Taux du jour, sinon dernier taux publié dans les 5 jours précédents
+function tauxPour(date) {
+  const cible = new Date(date); if (isNaN(cible)) return null;
+  let best = null;
+  for (const t of S.taux) {
+    if (!t.date || !(+t.fx > 0)) continue;
+    const ecart = (cible - new Date(t.date)) / 86400000;
+    if (ecart >= 0 && ecart <= 5 && (!best || ecart < best.ecart)) best = { fx: +t.fx, ecart, date: t.date };
+  }
+  return best;
+}
+function usages(date) {
+  const n = S.grants.reduce((a, g) => a + g.releases.filter(r => r.date === date).length, 0);
+  return n + (S.vente.date === date ? 1 : 0);
+}
+function renderTaux() {
+  S.taux.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  const tb = document.getElementById("fx-rows");
+  tb.innerHTML = S.taux.length ? S.taux.map((t, i) => `<tr>
+      <td><input type="date" id="fx-${i}-d" data-i="${i}" data-f="date" value="${t.date || ""}" aria-label="Date du taux"></td>
+      <td><input type="number" id="fx-${i}-v" data-i="${i}" data-f="fx" min="0" step="0.0001" value="${t.fx || ""}" aria-label="Dollars pour 1 euro"></td>
+      <td class="muted">${(u => u ? `${u} ligne${u > 1 ? "s" : ""}` : "—")(usages(t.date))}</td>
+      <td><button type="button" class="x" data-del="${i}" aria-label="Supprimer ce taux">×</button></td></tr>`).join("")
+    : `<tr><td colspan="4" class="muted">Aucun taux saisi. Les taux entrés directement dans les vestings restent utilisés.</td></tr>`;
+  tb.querySelectorAll("[data-f]").forEach(el => el.addEventListener("change", () => {
+    const t = S.taux[+el.dataset.i];
+    t[el.dataset.f] = el.dataset.f === "fx" ? (+el.value || 0) : el.value;
+    sauver(); renderTaux();
+  }));
+  tb.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => { S.taux.splice(+b.dataset.del, 1); sauver(); renderTaux(); }));
+}
+function msgTaux(t) { document.getElementById("fx-msg").textContent = t; }
+document.getElementById("fx-add").addEventListener("click", () => { S.taux.push({ date: S.vente.date || "", fx: 0 }); sauver(); renderTaux(); });
+document.getElementById("fx-fill").addEventListener("click", () => {
+  const dates = new Set(S.grants.flatMap(g => g.releases.map(r => r.date)).concat([S.vente.date]).filter(Boolean));
+  let n = 0;
+  dates.forEach(d => { if (!S.taux.some(t => t.date === d)) { S.taux.push({ date: d, fx: 0 }); n++; } });
+  sauver(); renderTaux(); msgTaux(n ? `${n} date${n > 1 ? "s" : ""} ajoutée${n > 1 ? "s" : ""} : complétez les taux puis appliquez-les.` : "Toutes les dates figurent déjà dans la table.");
+});
+document.getElementById("fx-paste-btn").addEventListener("click", () => { const t = document.getElementById("fx-paste-tool"); t.hidden = !t.hidden; });
+document.getElementById("fx-paste-ok").addEventListener("click", () => {
+  let ok = 0, ko = 0;
+  document.getElementById("fx-paste").value.split(/\r?\n/).forEach(l => {
+    if (!l.trim()) return;
+    const c = l.split(/\t|;/), d = lireDate(c[0]), v = lireNombre(c[1]);
+    if (!d || !(v > 0)) { ko++; return; }
+    const ex = S.taux.find(t => t.date === d);
+    if (ex) ex.fx = v; else S.taux.push({ date: d, fx: v });
+    ok++;
+  });
+  sauver(); renderTaux(); msgTaux(`${ok} taux ajouté${ok > 1 ? "s" : ""}${ko ? `, ${ko} ligne${ko > 1 ? "s" : ""} illisible${ko > 1 ? "s" : ""}` : ""}.`);
+});
+document.getElementById("fx-apply").addEventListener("click", () => {
+  let maj = 0, approx = 0, manque = 0;
+  S.grants.forEach(g => g.releases.forEach(r => {
+    const t = tauxPour(r.date);
+    if (!t) { manque++; return; }
+    r.fx = t.fx; maj++; if (t.ecart > 0) approx++;
+  }));
+  const tv = tauxPour(S.vente.date);
+  if (tv) { S.vente.fx = tv.fx; document.getElementById("v-fx").value = tv.fx; }
+  sauver(); renderGrants(); renderTaux(); recalc();
+  msgTaux(`${maj} vesting${maj > 1 ? "s" : ""} mis à jour${approx ? ` (${approx} avec le taux d'un jour précédent)` : ""}${manque ? `, ${manque} sans taux dans la table : leur taux actuel est conservé` : ""}. Cession : ${tv ? "taux mis à jour" : "aucun taux à cette date, taux actuel conservé"}.`);
+});
+renderTaux();
 
 </script>
 
