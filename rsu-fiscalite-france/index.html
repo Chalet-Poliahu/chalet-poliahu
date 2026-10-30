@@ -31,9 +31,10 @@
   --s1: #3987e5; --s2: #d95926; color-scheme: dark; }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
-.wrap { max-width: 1280px; margin: 0 auto; }
+.wrap { max-width: 1360px; margin: 0 auto; }
 header.top { padding-block: 32px 20px; display: grid; gap: 8px; border-bottom: 1px solid var(--line); margin-bottom: 24px; }
 .eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
 h1 { font-family: var(--f-display); font-weight: 700; font-size: clamp(28px, 4.2vw, 44px); line-height: 1.05; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
@@ -41,11 +42,11 @@ h2 { font-family: var(--f-display); font-weight: 600; font-size: 21px; margin: 0
 h3 { font-size: 15px; font-weight: 600; margin: 0; }
 p { margin: 0; }
 .lede { color: var(--muted); max-width: 70ch; }
-.grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 24px; align-items: start; }
-@media (max-width: 980px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 1100px) { .grid { grid-template-columns: minmax(0, 1fr); } }
 .col { display: grid; gap: 20px; min-width: 0; }
 .results { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
-@media (max-width: 980px) { .results { position: static; } }
+@media (max-width: 1100px) { .results { position: static; } }
 section.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; gap: 16px; min-width: 0; }
 .panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .step { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
@@ -68,9 +69,29 @@ button.danger { border-color: var(--line); background: transparent; color: var(-
 .lot-head input { font-weight: 600; max-width: 260px; background: var(--surface); }
 .lot .fields { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 .lot .wide { grid-column: 1 / -1; }
+
+.grant { border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: grid; gap: 12px; background: var(--surface-2); min-width: 0; }
+.grant-head { display: flex; justify-content: space-between; gap: 8px; align-items: center; flex-wrap: wrap; }
+.grant-head input { font-weight: 600; max-width: 280px; background: var(--surface); }
+.grant .fields { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+.grant .wide { grid-column: 1 / -1; }
+.rel { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; }
+.rel table { font-size: 13px; min-width: 640px; }
+.rel th, .rel td { padding: 5px 6px; vertical-align: middle; }
+.rel td input { padding: 4px 6px; font-size: 13px; }
+.rel td input[type=number] { width: 72px; }
+.rel td input[type=date] { width: 128px; }
+.rel tfoot td { font-weight: 600; border-bottom: none; }
+.chip { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 999px; white-space: nowrap; }
+.chip.ok { background: var(--accent-weak); color: var(--accent); }
+.chip.lock { background: var(--warn-bg); color: var(--warn); }
+.x { border: none; background: transparent; color: var(--muted); padding: 2px 6px; font-size: 16px; line-height: 1; }
+.tool { display: grid; gap: 10px; padding: 12px; border: 1px dashed var(--line); border-radius: 4px; background: var(--surface); }
+textarea { font-family: var(--f-mono); font-size: 13px; width: 100%; min-height: 110px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 8px; }
+.err { color: var(--bad); font-size: 13px; }
 .calc-hint { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
 
-.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
 @media (max-width: 560px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .tile { background: var(--surface); padding: 14px; display: grid; gap: 2px; min-width: 0; }
 .tile .k { font-size: 12px; color: var(--muted); }
@@ -136,21 +157,25 @@ a { color: var(--accent); }
           <label class="f"><span class="l">Moins-values reportables (€)</span><input id="f-mv" type="number" min="0" step="100" data-k="foyer.mvReport"><small>Des 10 dernières années</small></label>
         </div>
         <details>
-          <summary>Réglages avancés</summary>
+          <summary>Autres cessions de l'année, mobilité, réglages</summary>
           <div class="fields" style="margin-top:12px">
             <label class="f"><span class="l">RFR N-1 (€)</span><input id="f-rfr1" type="number" min="0" step="1000" data-k="foyer.rfrN1"><small>Pour le lissage de la CEHR</small></label>
             <label class="f"><span class="l">RFR N-2 (€)</span><input id="f-rfr2" type="number" min="0" step="1000" data-k="foyer.rfrN2"></label>
             <label class="f"><span class="l">Cotisations salariales, plan non qualifié (%)</span><input id="f-nq" type="number" min="0" max="30" step="0.5" data-k="foyer.tauxCotisNQ"><small>Environ 20 % sous 8 PASS, 10 % au-delà : voir votre bulletin de paie</small></label>
+            <label class="f"><span class="l">Gain d'acquisition déjà réalisé cette année (€)</span><input id="f-gdeja" type="number" min="0" step="1000" data-k="foyer.gainDeja"><small>Autres cessions de l'année : il consomme le seuil de 300 000 €</small></label>
+            <label class="f"><span class="l">Plus-value nette déjà réalisée cette année (€)</span><input id="f-pvdeja" type="number" step="100" data-k="foyer.pvDeja"><small>Négative en cas de moins-value</small></label>
+            <label class="f"><span class="l">Arrivée en France</span><input id="f-arr" type="date" data-k="foyer.arrivee"><small>Si vous êtes arrivé pendant l'acquisition</small></label>
+            <label class="f"><span class="l">Départ de France</span><input id="f-dep" type="date" data-k="foyer.depart"><small>Prorata de la part française de chaque vesting</small></label>
             <label class="chk"><input id="f-deduc" type="checkbox" data-k="foyer.deduc10" data-type="check"><span>Appliquer la déduction de 10 % pour frais professionnels au gain imposé comme un salaire (seulement si votre salaire n'atteint pas déjà le plafond de cette déduction)</span></label>
           </div>
         </details>
       </section>
 
       <section class="panel" aria-labelledby="h-lots">
-        <div class="panel-head"><h2 id="h-lots">Vos lots de RSU acquis</h2><span class="step">un lot = une date de vesting</span></div>
-        <p class="muted" style="font-size:14px">Le <b>cours à l'acquisition</b> est le cours du jour du vesting (acquisition définitive). Il est converti en euros au taux de change de ce jour (BOI-RSA-ES-20-20-20 § 120-130). Le taux s'exprime en dollars pour 1 euro, comme la BCE le publie.</p>
-        <div id="lots" class="col" style="gap:12px"></div>
-        <div class="row-actions"><button type="button" class="ghost" id="add-lot">Ajouter un lot</button></div>
+        <div class="panel-head"><h2 id="h-lots">Vos attributions et leurs vestings</h2><span class="step">1 grant → plusieurs releases</span></div>
+        <p class="muted" style="font-size:14px">Chaque vesting (release) a son propre coût d'acquisition : le cours du jour du vesting, converti en euros au taux de change de ce jour (BOI-RSA-ES-20-20-20 § 120-130). C'est ce coût qui sert à calculer le gain d'acquisition et la plus-value de chaque action vendue ; on ne fait pas de prix moyen entre vestings. Le taux s'écrit en dollars pour 1 euro, comme le publient la BCE et la Banque de France.</p>
+        <div id="grants" class="col" style="gap:16px"></div>
+        <div class="row-actions"><button type="button" class="ghost" id="add-grant">Ajouter une attribution</button></div>
       </section>
 
       <section class="panel" aria-labelledby="h-vente">
@@ -177,13 +202,13 @@ a { color: var(--accent); }
         </div>
         <div class="scroll"><table id="tab-lignes"><thead><tr><th>Prélèvement</th><th class="n">Assiette</th><th class="n">Montant</th></tr></thead><tbody></tbody></table></div>
         <div class="notes" id="notes"></div>
-        <details><summary>Détail par lot</summary><div class="scroll" style="margin-top:10px"><table id="tab-lots"><thead><tr><th>Lot</th><th class="n">Vendues</th><th class="n">Gain d'acquisition</th><th class="n">Plus-value</th><th class="n">Abattement</th><th class="n">Imposable barème</th></tr></thead><tbody></tbody></table></div></details>
+        <details><summary>Détail par vesting vendu</summary><div class="scroll" style="margin-top:10px"><table id="tab-lots"><thead><tr><th>Vesting</th><th class="n">Vendues</th><th class="n">Coût €/action</th><th class="n">Part France</th><th class="n">Gain d'acquisition</th><th class="n">Plus-value</th><th class="n">Abattement</th><th class="n">Imposable barème</th></tr></thead><tbody></tbody></table></div></details>
       </section>
     </div>
   </div>
 
   <section class="panel" aria-labelledby="h-opt" style="margin-top:24px">
-    <div class="panel-head"><h2 id="h-opt">Combien d'actions vendre ?</h2><span class="step">ordre de vente : lot le moins taxé d'abord</span></div>
+    <div class="panel-head"><h2 id="h-opt">Combien d'actions vendre ?</h2><span class="step">ordre de vente : vesting le moins taxé d'abord</span></div>
     <div class="legend"><span><i style="background:var(--s1)"></i>Net après impôts</span><span><i style="background:var(--s2)"></i>Impôts et prélèvements</span><span><i style="background:var(--muted);height:1px"></i>Seuil des 300 000 € de gain</span></div>
     <div class="chart-box" id="chart-box"><svg class="chart" id="chart" viewBox="0 0 900 300" role="img" aria-label="Net et impôts selon le nombre d'actions vendues"></svg><div class="tip" id="tip" hidden></div></div>
     <div class="optim-grid">
@@ -219,6 +244,18 @@ a { color: var(--accent); }
         <li>Le seuil de 300 000 € est annuel et non reportable : il s'apprécie en additionnant tous les gains d'acquisition des actions cédées dans l'année (BOI-RSA-ES-20-20-20 § 44).</li>
         <li>Une <b>moins-value</b> (vente sous le cours du vesting) se déduit du gain d'acquisition du même lot, avant abattement et avant d'apprécier le seuil de 300 000 € (§ 190).</li>
       </ul></div></details>
+      <details><summary>Vestings multiples, délais et taux de change</summary><div class="prose" style="margin-top:8px"><ul>
+        <li><b>Un coût par vesting.</b> Chaque release a pour coût le cours du jour du vesting converti au taux de ce jour. Quand le cours passe de 60 $ à 260 $ en quatre ans, le gain d'acquisition et la plus-value changent beaucoup d'un vesting à l'autre : le simulateur calcule chaque release séparément.</li>
+        <li><b>Délai minimal avant de vendre.</b> Depuis la loi Macron, la période d'acquisition dure au moins un an et la durée cumulée d'acquisition et de conservation au moins deux ans (C. com. L225-197-1) : sans période de conservation dans le plan, ne vendez pas avant la date d'attribution + 2 ans. Pour les plans antérieurs (AGE avant le 08/08/2015), il fallait 2 ans d'acquisition puis 2 ans de conservation. Vendre plus tôt fait perdre le régime : le gain est imposé comme un salaire (BOI-RSA-ES-20-20-20 § 10).</li>
+        <li><b>Change.</b> Un même prix en dollars peut donner une plus-value ou une moins-value en euros si le dollar a varié entre le vesting et la vente. Une moins-value sur un vesting se déduit d'abord du gain d'acquisition de ce vesting (CGI 80 quaterdecies V).</li>
+        <li><b>Mobilité.</b> La part imposable en France est calculée pour chaque vesting au prorata des jours passés en France entre l'attribution et le vesting (BOI-RSA-ES-20-20-20 § 70-80). Le régime des plans qualifiés suppose que vous êtes résident fiscal français le jour de la vente.</li>
+      </ul></div></details>
+      <details><summary>Écarts avec le document « French RSU »</summary><div class="prose" style="margin-top:8px"><ul>
+        <li>Les prélèvements sociaux sur le gain sous 300 000 € et sur la plus-value sont de <b>18,6 %</b> pour les revenus 2025 et 2026, et non 17,2 % : la LFSS pour 2026 a porté la CSG sur les revenus du patrimoine à 10,6 % (CSS L136-8).</li>
+        <li>La CSG déductible sur le gain qui bénéficie de l'abattement de 50 % ne se déduit qu'au prorata de la part imposée (CGI 154 quinquies II) : 6,8 % × 50 % × votre taux marginal, soit environ 1,5 point à 45 %, et non 3,1 points. Elle réduit l'impôt de l'année suivante.</li>
+        <li>Pour un plan qualifié, le gain d'acquisition est imposé l'<b>année de la vente</b>, pas l'année du vesting (CGI 80 quaterdecies II). Seuls les plans non qualifiés sont imposés au vesting.</li>
+        <li>Le reste concorde : coût propre à chaque security, délai attribution + 2 ans, prorata France, effet du change, seuil de 300 000 €.</li>
+      </ul></div></details>
       <details><summary>La plus-value de cession</summary><div class="prose" style="margin-top:8px"><ul>
         <li>Plus-value = prix de vente net de frais − cours du vesting, chacun converti en euros au taux de son jour.</li>
         <li>Imposée au prélèvement forfaitaire unique : 12,8 % d'impôt + 18,6 % de prélèvements sociaux, soit 31,4 %. L'option pour le barème est globale : elle s'applique à tous vos revenus du capital de l'année (CGI 200 A-2). Pour des actions acquises depuis 2018, aucun abattement pour durée de détention.</li>
@@ -231,11 +268,11 @@ a { color: var(--accent); }
       <details><summary>Ce que le simulateur ne fait pas</summary><div class="prose" style="margin-top:8px"><ul>
         <li>Le barème 2026 n'est pas encore voté (loi de finances pour 2027 en discussion) : le barème des revenus 2025 est reconduit.</li>
         <li>Aucune réduction ou crédit d'impôt, ni la règle des revenus exceptionnels de la CDHR (quart du montant), ni l'abattement fixe des dirigeants de PME partant à la retraite.</li>
-        <li>Mobilité internationale : seule la fraction française du gain d'acquisition est imposée ici. La part étrangère peut rester prise en compte pour le taux effectif ; faites valider le calcul.</li>
-        <li>Le seuil de 300 000 € est attribué aux lots par ordre de date de vesting.</li>
+        <li>Mobilité internationale : seule la fraction française du gain d'acquisition est imposée ici, sans calcul au taux effectif. Faites valider le calcul.</li>
+        <li>Le seuil de 300 000 € est attribué aux vestings vendus par ordre de date. Les gains déjà réalisés dans l'année sont supposés relever d'un plan postérieur à 2017.</li><li>Les taux de change ne sont pas chargés automatiquement : saisissez le taux BCE ou Banque de France du jour de chaque vesting.</li>
         <li>Plan non qualifié : le gain de vesting n'est compté que si le vesting a lieu l'année simulée. Les cotisations sont un taux moyen que vous saisissez.</li>
         <li>La CSG déductible (6,8 points, au prorata de la part imposée) réduit votre impôt de l'année suivante : elle est indiquée à part, pas déduite du total.</li>
-        <li>Le choix du lot vendu suppose que votre courtier identifie les lots. Faites confirmer cette méthode si vous détenez d'autres actions de la même société.</li>
+        <li>Le choix du vesting vendu suppose que votre courtier identifie chaque security (ShareWorks, Morgan Stanley, Schwab le font). Faites confirmer cette méthode si vous détenez d'autres actions de la même société.</li>
       </ul></div></details>
       <details><summary>Sources</summary><div class="prose" style="margin-top:8px"><ul>
         <li><a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000042340496" target="_blank" rel="noopener">CGI art. 80 quaterdecies</a> · <a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000053546896" target="_blank" rel="noopener">CGI art. 200 A</a> · <a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000053542636" target="_blank" rel="noopener">CGI art. 197 (barème)</a> · <a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000036427364" target="_blank" rel="noopener">CGI art. 223 sexies</a> · <a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000053561826" target="_blank" rel="noopener">CGI art. 224</a></li>
@@ -356,94 +393,155 @@ function foyerImpots(f, P, revBareme, pfuBase, abatt50, abatt1ter) {
   return { ir, pfuIR, cehr: c1, cdhr: c2, rfr, total: ir + pfuIR + c1 + c2, tmi: (impotBareme(revBareme + 100, f.parts, f.couple, P) - ir) / 100 };
 }
 
-// Évalue une cession : qtys[i] = nombre d'actions vendues dans le lot i
-function evaluer(S, qtys, opts = {}) {
+// ----- Grants et releases -----
+// Chaque release (vesting) a son propre coût d'acquisition : cours du jour × taux de change du jour.
+// Pas de prix moyen pondéré entre releases (identification de la security vendue).
+const JOUR = 86400000;
+function ajouterAns(d, n) { const x = new Date(d); x.setFullYear(x.getFullYear() + n); return x; }
+
+// Fraction française du gain : jours en France entre l'attribution et le vesting (BOI-RSA-ES-20-20-20 § 70-90)
+function fractionFrance(dateGrant, dateRelease, arrivee, depart) {
+  const g = new Date(dateGrant), r = new Date(dateRelease);
+  if (isNaN(g) || isNaN(r) || r <= g) return 1;
+  const a = arrivee ? new Date(arrivee) : null, d = depart ? new Date(depart) : null;
+  const debut = Math.max(+g, a && !isNaN(a) ? +a : -Infinity);
+  const fin = Math.min(+r, d && !isNaN(d) ? +d : Infinity);
+  return Math.max(0, Math.min(1, (fin - debut) / (+r - +g)));
+}
+
+// Date à partir de laquelle la cession ne fait plus perdre le régime des actions gratuites (C. com. L225-197-1)
+function dateCessibleLegale(regime, dateGrant, dateRelease, finConservPlan) {
+  const r = new Date(dateRelease);
+  let d = r;
+  if (dateGrant) {
+    const g = new Date(dateGrant);
+    if (regime === "Q12") {
+      // avant la loi Macron : 2 ans d'acquisition + 2 ans de conservation, sauf acquisition d'au moins 4 ans
+      if ((r - g) < 4 * 365.25 * JOUR) d = ajouterAns(r, 2);
+    } else {
+      const g2 = ajouterAns(g, 2);
+      if (g2 > d) d = g2;
+    }
+  }
+  if (finConservPlan) { const p = new Date(finConservPlan); if (!isNaN(p) && p > d) d = p; }
+  return d;
+}
+
+function preparer(S) {
+  const f = S.foyer, lots = [];
+  S.grants.forEach((g, gi) => g.releases.forEach((rl, ri) => {
+    const src = g.regime === "NQ" && !f.arrivee && !f.depart ? 1 : fractionFrance(g.dateGrant, rl.date, f.arrivee, f.depart);
+    const cessible = g.regime === "NQ" ? null : dateCessibleLegale(g.regime, g.dateGrant, rl.date, g.finConserv);
+    const acqCourte = g.regime !== "NQ" && g.dateGrant && (new Date(rl.date) - new Date(g.dateGrant)) < (g.regime === "Q12" ? 2 : 1) * 365 * JOUR;
+    lots.push({
+      gi, ri, nom: `${g.nom} · ${formatDate(rl.date)}`, regime: g.regime, dateGrant: g.dateGrant, dateAcq: rl.date,
+      qte: +rl.qte || 0, fmv: +rl.fmv || 0, fx: +rl.fx || 1, vendre: +rl.vendre || 0, src: src * 100,
+      cessible, conservOk: cessible ? new Date(S.vente.date) >= cessible : true, acqCourte
+    });
+  }));
+  return Object.assign({}, S, { lots });
+}
+function formatDate(d) { const x = new Date(d); return isNaN(x) ? "?" : x.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }); }
+
+// Évalue une cession : qtys[i] = nombre d'actions vendues dans la release i (S préparé par preparer())
+function evaluer(S, qtys) {
   const f = S.foyer, v = S.vente, P = Object.assign({}, PARAMS[f.annee], S.surcharges || {});
   const annee = +f.annee;
   const totalQ = qtys.reduce((a, b) => a + b, 0);
   const fraisParAction = totalQ > 0 ? (+v.frais || 0) / totalQ : 0;
   const prixNetEUR = ((+v.prix || 0) - fraisParAction) / (+v.fx || 1);
   const deduc = f.deduc10 ? 0.9 : 1;
+  const tauxCot = (+f.tauxCotisNQ || 0) / 100;
   const r = {
     P, prixNetEUR, totalQ, produit: 0, lots: [], alertes: [],
     bareme: 0, abatt50: 0, abatt1ter: 0, basePatrimoine: 0, baseActivite: 0, baseContrib: 0,
     cotisNQ: 0, gainNQ: 0, pvSomme: 0, csgDedN1: 0
   };
-  let reste300 = P.seuilAGA;
+  // Gains d'acquisition déjà réalisés cette année par d'autres cessions (plan post-2017 supposé)
+  const deja = Math.max(0, +f.gainDeja || 0);
+  const dejaBas = Math.min(deja, P.seuilAGA), dejaHaut = deja - dejaBas;
+  let reste300 = P.seuilAGA - dejaBas;
+  const salaireDroitCommun = (G) => { // gain imposé comme un salaire ordinaire
+    const cot = G * tauxCot;
+    r.gainNQ += G; r.cotisNQ += cot;
+    const imposable = (G - cot + G * 0.9825 * 0.029) * deduc;
+    r.bareme += imposable; return imposable;
+  };
   const ordre = S.lots.map((l, i) => i).sort((a, b) => String(S.lots[a].dateAcq).localeCompare(String(S.lots[b].dateAcq)));
   for (const i of ordre) {
     const l = S.lots[i], q = qtys[i] || 0;
     const fmvEUR = (+l.fmv || 0) / (+l.fx || 1), src = Math.min(1, Math.max(0, (+l.src || 0) / 100));
     const produit = q * prixNetEUR, gainBrut = q * fmvEUR, pv = produit - gainBrut;
     r.produit += produit;
-    const d = { i, nom: l.nom, regime: l.regime, q, fmvEUR, produit, gainBrut, pv, gainImpose: 0, abattement: 0, imposableBareme: 0, patrimoine: 0, activite: 0 };
+    const d = { i, nom: l.nom, regime: l.regime, q, fmvEUR, produit, gainBrut, pv, src, gainImpose: 0, abattement: 0, imposableBareme: 0 };
     if (l.regime === "NQ") {
       if (new Date(l.dateAcq).getFullYear() === annee) {
         const G = (+l.qte || 0) * fmvEUR * src;
-        const cot = G * (+f.tauxCotisNQ || 0) / 100;
-        const imposable = (G - cot + G * 0.9825 * 0.029) * deduc;
-        r.gainNQ += G; r.cotisNQ += cot; r.bareme += imposable;
-        d.salaireNQ = G; d.imposableBareme = imposable;
-        r.csgDedN1 += 0; // CSG d'activité déduite directement via la paie
+        d.salaireNQ = G; d.imposableBareme = salaireDroitCommun(G);
       }
       r.pvSomme += pv; // plus ou moins-value de droit commun
+    } else if (q > 0 && l.conservOk === false) {
+      // Cession avant la fin de la période légale ou contractuelle : règles de droit commun des salaires (BOFiP § 10)
+      const g = gainBrut * src;
+      d.gainImpose = g; d.horsRegime = true; d.imposableBareme = salaireDroitCommun(g);
+      r.pvSomme += pv;
+      r.alertes.push(`« ${l.nom} » : vente avant le ${formatDate(l.cessible)}. Le gain d'acquisition perd le régime des actions gratuites et est imposé comme un salaire (BOI-RSA-ES-20-20-20 § 10). Le taux de cotisations saisi pour les plans non qualifiés est appliqué.`);
     } else {
       const gainNet = Math.max(0, gainBrut + Math.min(0, pv)); // CGI 80 quaterdecies V
-      const pvPos = Math.max(0, pv);
-      r.pvSomme += pvPos;
+      r.pvSomme += Math.max(0, pv);
       const g = gainNet * src;
       d.gainImpose = g; d.mvImputee = Math.min(gainBrut, Math.max(0, -pv));
       if (l.regime === "Q18" || l.regime === "Q17") {
         const bas = Math.min(g, reste300); reste300 -= bas; const haut = g - bas;
-        let a = 0.5;
-        if (l.regime === "Q17") a = abattementDuree(l.dateAcq, v.date);
+        const a = l.regime === "Q17" ? abattementDuree(l.dateAcq, v.date) : 0.5;
         const abat = bas * a;
         if (l.regime === "Q18") r.abatt50 += abat; else r.abatt1ter += abat;
         r.bareme += bas - abat + haut * deduc;
         r.basePatrimoine += bas; r.baseActivite += haut; r.baseContrib += haut;
         r.csgDedN1 += P.csgDeductible * (bas - abat) + P.csgDeductible * haut;
-        Object.assign(d, { abattement: abat, tauxAbat: a, sous300: bas, sur300: haut, imposableBareme: bas - abat + haut * deduc, patrimoine: bas, activite: haut });
+        Object.assign(d, { abattement: abat, tauxAbat: a, sous300: bas, sur300: haut, imposableBareme: bas - abat + haut * deduc });
       } else if (l.regime === "Q15") {
         const a = abattementDuree(l.dateAcq, v.date), abat = g * a;
         r.abatt1ter += abat; r.bareme += g - abat; r.basePatrimoine += g;
         r.csgDedN1 += P.csgDeductible * (g - abat);
-        Object.assign(d, { abattement: abat, tauxAbat: a, imposableBareme: g - abat, patrimoine: g });
+        Object.assign(d, { abattement: abat, tauxAbat: a, imposableBareme: g - abat });
       } else if (l.regime === "Q12") {
         r.bareme += g * deduc; r.baseActivite += g; r.baseContrib += g; r.csgDedN1 += P.csgDeductible * g;
-        Object.assign(d, { imposableBareme: g * deduc, activite: g });
+        d.imposableBareme = g * deduc;
       }
-      if (q > 0 && l.conservOk === false)
-        r.alertes.push(`Lot « ${l.nom} » : cession avant la fin de la période de conservation. Le BOFiP (BOI-RSA-ES-20-20-20 § 10) impose alors le gain selon les règles de droit commun des salaires : le calcul ci-dessous est trop favorable.`);
     }
-    if (q > (+l.qte || 0)) r.alertes.push(`Lot « ${l.nom} » : vous vendez plus d'actions (${q}) que vous n'en détenez (${l.qte}).`);
+    if (q > 0 && l.acqCourte) r.alertes.push(`« ${l.nom} » : moins d'${l.regime === "Q12" ? "deux ans" : "un an"} entre l'attribution et le vesting, en dessous du minimum légal (C. com. L225-197-1). Vérifiez la date d'attribution : le plan pourrait ne pas être qualifié.`);
+    if (q > (+l.qte || 0)) r.alertes.push(`« ${l.nom} » : vous vendez ${q} actions alors que la release n'en compte que ${l.qte}.`);
     r.lots.push(d);
   }
   r.lots.sort((a, b) => a.i - b.i);
-  const mvDispo = +f.mvReport || 0;
-  r.pvNette = Math.max(0, r.pvSomme - mvDispo);
-  r.mvRestante = Math.max(0, mvDispo - Math.max(0, r.pvSomme));
-  r.mvNouvelle = Math.max(0, -r.pvSomme);
+
+  // Plus-values : celles déjà réalisées dans l'année et les moins-values reportables s'imputent ensemble
+  const mvDispo = +f.mvReport || 0, pvDeja = +f.pvDeja || 0;
+  const pvAnneeAvant = Math.max(0, pvDeja - mvDispo);
+  const pvAnneeApres = Math.max(0, pvDeja + r.pvSomme - mvDispo);
+  r.pvNette = pvAnneeApres - pvAnneeAvant; // part attribuable à cette cession (peut être négative)
+  r.mvNouvelle = Math.max(0, -(pvDeja + r.pvSomme)) - Math.max(0, -pvDeja); // nouvelle moins-value reportable 10 ans
 
   const autres = +f.autresPFU || 0;
-  const base = foyerImpots(f, P, +f.revenu || 0, autres, 0, 0);
-  const avecPFU = foyerImpots(f, P, (+f.revenu || 0) + r.bareme, autres + r.pvNette, r.abatt50, r.abatt1ter);
-  const avecBar = foyerImpots(f, P, (+f.revenu || 0) + r.bareme + r.pvNette + autres, 0, r.abatt50, r.abatt1ter);
+  const revBase = (+f.revenu || 0) + dejaBas * 0.5 + dejaHaut * deduc, abattBase = dejaBas * 0.5;
+  const base = foyerImpots(f, P, revBase, autres + pvAnneeAvant, abattBase, 0);
+  const avecPFU = foyerImpots(f, P, revBase + r.bareme, autres + pvAnneeApres, abattBase + r.abatt50, r.abatt1ter);
+  const avecBar = foyerImpots(f, P, revBase + r.bareme + pvAnneeApres + autres, 0, abattBase + r.abatt50, r.abatt1ter);
   let option = v.pvOption;
-  const socialFixe = r.basePatrimoine * P.psPatrimoine + r.baseActivite * (P.csgActivite + P.crds) + r.baseContrib * P.contribSalariale + r.cotisNQ;
-  const psPV = r.pvNette * P.psPatrimoine;
   if (option === "auto") option = avecBar.total <= avecPFU.total ? "bareme" : "pfu";
   const avec = option === "bareme" ? avecBar : avecPFU;
   r.option = option; r.base = base; r.avec = avec; r.avecPFU = avecPFU; r.avecBar = avecBar;
-  if (option === "bareme") r.csgDedN1 += P.csgDeductible * r.pvNette;
+  if (option === "bareme") r.csgDedN1 += P.csgDeductible * Math.max(0, r.pvNette);
 
   r.lignes = [
-    { id: "ir", lib: "Impôt sur le revenu (barème progressif)", assiette: r.bareme + (option === "bareme" ? r.pvNette : 0), montant: avec.ir - base.ir, ref: "CGI art. 197, 200 A-3" },
-    { id: "pfu", lib: "Impôt forfaitaire 12,8 % sur la plus-value (PFU)", montant: avec.pfuIR - base.pfuIR, ref: "CGI art. 200 A-1" },
+    { id: "ir", lib: "Impôt sur le revenu (barème progressif)", assiette: r.bareme + (option === "bareme" ? Math.max(0, r.pvNette) : 0), montant: avec.ir - base.ir, ref: "CGI art. 197, 200 A-3" },
+    { id: "pfu", lib: "Impôt forfaitaire 12,8 % sur la plus-value (PFU)", assiette: option === "pfu" ? r.pvNette : null, montant: avec.pfuIR - base.pfuIR, ref: "CGI art. 200 A-1" },
     { id: "psp", lib: `Prélèvements sociaux patrimoine ${pct(P.psPatrimoine)} — gain ≤ 300 k€`, assiette: r.basePatrimoine, montant: r.basePatrimoine * P.psPatrimoine, ref: "CSS L136-6 I-e, L136-8 ; CGI 235 ter" },
-    { id: "pspv", lib: `Prélèvements sociaux ${pct(P.psPatrimoine)} — plus-value de cession`, assiette: r.pvNette, montant: psPV, ref: "CSS L136-6 I-e" },
+    { id: "pspv", lib: `Prélèvements sociaux ${pct(P.psPatrimoine)} — plus-value de cession`, assiette: r.pvNette, montant: r.pvNette * P.psPatrimoine, ref: "CSS L136-6 I-e" },
     { id: "act", lib: `CSG/CRDS revenus d'activité ${pct(P.csgActivite + P.crds)} — gain > 300 k€ ou ancien régime`, assiette: r.baseActivite, montant: r.baseActivite * (P.csgActivite + P.crds), ref: "CSS L136-1-1, L136-8" },
     { id: "csal", lib: "Contribution salariale 10 %", assiette: r.baseContrib, montant: r.baseContrib * P.contribSalariale, ref: "CSS L137-14" },
-    { id: "nq", lib: "Cotisations sociales salariales (plan non qualifié, via la paie)", assiette: r.gainNQ, montant: r.cotisNQ, ref: "Salaire de droit commun" },
+    { id: "nq", lib: "Cotisations sociales salariales (gain imposé comme un salaire)", assiette: r.gainNQ, montant: r.cotisNQ, ref: "Salaire de droit commun" },
     { id: "cehr", lib: "Contribution exceptionnelle sur les hauts revenus", montant: avec.cehr - base.cehr, ref: "CGI art. 223 sexies" },
     { id: "cdhr", lib: "Contribution différentielle (taux minimal 20 %)", montant: avec.cdhr - base.cdhr, ref: "CGI art. 224" }
   ];
@@ -458,7 +556,8 @@ function pct(x) { return (Math.round(x * 1000) / 10).toString().replace(".", ","
 
 // Courbe : impôts et net en fonction du nombre d'actions cédées (ordre glouton le moins taxé)
 function courbe(S, nbPoints = 60) {
-  const dispo = S.lots.map(l => Math.max(0, Math.floor(+l.qte || 0)));
+  // Les releases encore bloquées (période légale ou du plan) sont exclues de l'optimisation
+  const dispo = S.lots.map(l => l.conservOk === false ? 0 : Math.max(0, Math.floor(+l.qte || 0)));
   const total = dispo.reduce((a, b) => a + b, 0);
   const pas = Math.max(1, Math.ceil(total / nbPoints));
   const q = dispo.map(() => 0);
@@ -512,7 +611,7 @@ function etalement(S, qtys, maxAns = 4) {
     for (let y = 0; y < n; y++) {
       const qy = qtys.map(x => Math.floor(x / n) + (y < x % n ? 1 : 0));
       const S2 = JSON.parse(JSON.stringify(S));
-      if (y > 0) S2.lots.forEach(l => { if (l.regime === "NQ") l.dateAcq = "1900-01-01"; });
+      if (y > 0) { S2.foyer.gainDeja = 0; S2.foyer.pvDeja = 0; S2.lots.forEach(l => { if (l.regime === "NQ") l.dateAcq = "1900-01-01"; }); }
       const r = evaluer(S2, qy);
       total += r.totalImpots; produit += r.produit;
     }
@@ -525,9 +624,9 @@ function etalement(S, qtys, maxAns = 4) {
 function capacite300(S) {
   const P = PARAMS[S.foyer.annee];
   const prixNetEUR = (+S.vente.prix || 0) / (+S.vente.fx || 1);
-  let reste = P.seuilAGA; const out = [];
-  const ordre = S.lots.map((l, i) => i).filter(i => S.lots[i].regime === "Q18" || S.lots[i].regime === "Q17")
-    .sort((a, b) => String(S.lots[a].dateAcq).localeCompare(String(S.lots[b].dateAcq)));
+  let reste = Math.max(0, P.seuilAGA - (+S.foyer.gainDeja || 0)); const out = [];
+  const ordre = S.lots.map((l, i) => i).filter(i => (S.lots[i].regime === "Q18" || S.lots[i].regime === "Q17") && S.lots[i].conservOk !== false)
+    .sort((a, b) => S.lots[a].fmv / S.lots[a].fx - S.lots[b].fmv / S.lots[b].fx); // gain par action croissant : le plus d'actions possible
   for (const i of ordre) {
     const l = S.lots[i];
     const g = Math.min((+l.fmv || 0) / (+l.fx || 1), prixNetEUR) * ((+l.src || 0) / 100);
@@ -537,156 +636,277 @@ function capacite300(S) {
   return out;
 }
 
-if (typeof module !== "undefined") module.exports = { evaluer, courbe, pourNet, etalement, capacite300, impotBareme, cehr, cdhr, PARAMS };
+if (typeof module !== "undefined") module.exports = { preparer, fractionFrance, dateCessibleLegale, evaluer, courbe, pourNet, etalement, capacite300, impotBareme, cehr, cdhr, PARAMS };
 
 </script>
 <script>
 const eur = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
 const nb = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 });
 const fmt = x => eur.format(Math.round(x || 0));
-const STORE = "rsu-fr-v1";
+const dec = (x, n = 2) => (+x || 0).toFixed(n).replace(".", ",");
+const STORE = "rsu-fr-v2";
+
+// Exemple : un cours qui passe de 60 $ à 260 $ en plusieurs phases sur quatre ans (valeurs fictives)
+function trimestres(debut, n, qte, cours, fx) {
+  return cours.slice(0, n).map((c, k) => {
+    const d = new Date(debut); d.setMonth(d.getMonth() + 3 * k);
+    return { date: d.toISOString().slice(0, 10), qte, fmv: c, fx: fx[k], vendre: 0 };
+  });
+}
 const EXEMPLE = {
-  foyer: { annee: "2026", couple: true, parts: 3, pac: 2, revenu: 140000, autresPFU: 2000, mvReport: 0, rfrN1: 0, rfrN2: 0, tauxCotisNQ: 20, deduc10: false },
-  vente: { date: "2026-11-16", prix: 245, fx: 1.16, frais: 25, pvOption: "auto" },
-  lots: [
-    { nom: "Vesting mars 2024", regime: "Q18", dateAcq: "2024-03-15", qte: 400, vendre: 400, fmv: 180, fx: 1.09, src: 100, conservOk: true },
-    { nom: "Vesting mars 2025", regime: "Q18", dateAcq: "2025-03-15", qte: 400, vendre: 400, fmv: 215, fx: 1.08, src: 100, conservOk: true },
-    { nom: "Vesting sept. 2025", regime: "Q18", dateAcq: "2025-09-15", qte: 350, vendre: 0, fmv: 260, fx: 1.17, src: 100, conservOk: true }
+  foyer: { annee: "2026", couple: true, parts: 3, pac: 2, revenu: 140000, autresPFU: 2000, mvReport: 0, rfrN1: 0, rfrN2: 0, tauxCotisNQ: 20, deduc10: false, gainDeja: 0, pvDeja: 0, arrivee: "", depart: "" },
+  vente: { date: "2026-11-16", prix: 265, fx: 1.16, frais: 25, pvOption: "auto" },
+  grants: [
+    { nom: "Grant 2022", regime: "Q18", dateGrant: "2022-03-15", finConserv: "",
+      releases: [{ date: "2023-03-15", qte: 400, fmv: 60, fx: 1.07, vendre: 400 }].concat(
+        trimestres("2023-06-15", 12, 100, [62, 65, 70, 85, 95, 110, 120, 150, 170, 185, 200, 240],
+          [1.09, 1.07, 1.10, 1.08, 1.07, 1.11, 1.05, 1.08, 1.15, 1.17, 1.17, 1.15])) },
+    { nom: "Refresh 2025", regime: "Q18", dateGrant: "2025-01-15", finConserv: "",
+      releases: trimestres("2026-01-15", 4, 50, [230, 240, 250, 260], [1.17, 1.14, 1.16, 1.16]) }
   ]
 };
-let S;
-let estExemple = true;
+EXEMPLE.grants[0].releases.slice(1, 4).forEach(r => r.vendre = r.qte);
+
+let S, estExemple = true;
 try { const raw = localStorage.getItem(STORE); if (raw) { S = JSON.parse(raw); estExemple = false; } } catch (e) {}
-if (!S || !S.lots) S = JSON.parse(JSON.stringify(EXEMPLE));
+if (!S || !S.grants) S = JSON.parse(JSON.stringify(EXEMPLE));
 
 function sauver() { estExemple = false; document.getElementById("ex-badge").hidden = true; try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }
 function getK(path) { return path.split(".").reduce((o, k) => o[k], S); }
 function setK(path, val) { const ks = path.split("."); const last = ks.pop(); ks.reduce((o, k) => o[k], S)[last] = val; }
-
 function lireInput(el) {
   if (el.dataset.type === "check") return el.checked;
   if (el.dataset.type === "bool") return el.value === "true";
   if (el.type === "number") return el.value === "" ? 0 : +el.value;
   return el.value;
 }
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
 function bindStatic() {
   document.querySelectorAll("[data-k]").forEach(el => {
     const v = getK(el.dataset.k);
-    if (el.dataset.type === "check") el.checked = !!v; else el.value = String(v);
+    if (el.dataset.type === "check") el.checked = !!v; else el.value = v == null ? "" : String(v);
     el.addEventListener("input", () => { setK(el.dataset.k, lireInput(el)); sauver(); recalc(); });
   });
   document.getElementById("ex-badge").hidden = !estExemple;
 }
 
-function renderLots() {
-  const box = document.getElementById("lots");
+// ----- Saisie des attributions -----
+function renderGrants() {
+  const box = document.getElementById("grants");
   box.innerHTML = "";
-  S.lots.forEach((l, i) => {
-    const d = document.createElement("div");
-    d.className = "lot";
-    const opts = Object.entries(REGIMES).map(([k, v]) => `<option value="${k}"${k === l.regime ? " selected" : ""}>${v}</option>`).join("");
-    d.innerHTML = `
-      <div class="lot-head"><input id="lot-${i}-nom" aria-label="Nom du lot" data-f="nom" value="${String(l.nom).replace(/"/g, "&quot;")}"><button type="button" class="danger small" data-del="${i}">Retirer</button></div>
+  S.grants.forEach((g, gi) => {
+    const el = document.createElement("div");
+    el.className = "grant";
+    const opts = Object.entries(REGIMES).map(([k, v]) => `<option value="${k}"${k === g.regime ? " selected" : ""}>${v}</option>`).join("");
+    const rows = g.releases.map((r, ri) => `
+      <tr>
+        <td><input type="date" id="g${gi}-r${ri}-date" data-r="${ri}" data-f="date" value="${r.date}" aria-label="Date du vesting"></td>
+        <td><input type="number" id="g${gi}-r${ri}-qte" data-r="${ri}" data-f="qte" min="0" step="1" value="${r.qte}" aria-label="Actions vestées"></td>
+        <td><input type="number" id="g${gi}-r${ri}-fmv" data-r="${ri}" data-f="fmv" min="0" step="0.01" value="${r.fmv}" aria-label="Cours au vesting en dollars"></td>
+        <td><input type="number" id="g${gi}-r${ri}-fx" data-r="${ri}" data-f="fx" min="0" step="0.0001" value="${r.fx}" aria-label="Dollars pour 1 euro"></td>
+        <td class="n" id="g${gi}-r${ri}-eur"></td>
+        <td class="n" id="g${gi}-r${ri}-src"></td>
+        <td id="g${gi}-r${ri}-cess"></td>
+        <td><input type="number" id="g${gi}-r${ri}-vendre" data-r="${ri}" data-f="vendre" min="0" step="1" value="${r.vendre}" aria-label="Actions à vendre"></td>
+        <td><button type="button" class="x" data-delr="${ri}" aria-label="Supprimer ce vesting">×</button></td>
+      </tr>`).join("");
+    el.innerHTML = `
+      <div class="grant-head"><input id="g${gi}-nom" data-g="nom" value="${esc(g.nom)}" aria-label="Nom de l'attribution"><button type="button" class="danger small" data-delg>Retirer l'attribution</button></div>
       <div class="fields">
-        <label class="f wide"><span class="l">Régime du plan</span><select id="lot-${i}-regime" data-f="regime">${opts}</select></label>
-        <label class="f"><span class="l">Date du vesting</span><input id="lot-${i}-date" type="date" data-f="dateAcq" value="${l.dateAcq}"></label>
-        <label class="f"><span class="l">Actions détenues</span><input id="lot-${i}-qte" type="number" min="0" step="1" data-f="qte" value="${l.qte}"></label>
-        <label class="f"><span class="l">Cours au vesting ($)</span><input id="lot-${i}-fmv" type="number" min="0" step="0.01" data-f="fmv" value="${l.fmv}"></label>
-        <label class="f"><span class="l">Taux $ pour 1 € au vesting</span><input id="lot-${i}-fx" type="number" min="0" step="0.0001" data-f="fx" value="${l.fx}"></label>
-        <label class="f"><span class="l">Actions à vendre</span><input id="lot-${i}-vendre" type="number" min="0" step="1" data-f="vendre" value="${l.vendre}"></label>
-        <label class="f"><span class="l">Part française du gain (%)</span><input id="lot-${i}-src" type="number" min="0" max="100" step="1" data-f="src" value="${l.src}"><small>100 % sans mobilité internationale</small></label>
-        <label class="chk wide"><input id="lot-${i}-cons" type="checkbox" data-f="conservOk"${l.conservOk !== false ? " checked" : ""}><span>Période de conservation terminée (acquisition + conservation d'au moins 2 ans au total pour un plan qualifié)</span></label>
-        <p class="calc-hint wide" id="lot-${i}-hint"></p>
+        <label class="f wide"><span class="l">Régime du plan</span><select id="g${gi}-regime" data-g="regime">${opts}</select></label>
+        <label class="f"><span class="l">Date d'attribution (grant)</span><input id="g${gi}-dg" type="date" data-g="dateGrant" value="${g.dateGrant || ""}"><small>Point de départ des 2 ans et du prorata France</small></label>
+        <label class="f"><span class="l">Fin de conservation du plan</span><input id="g${gi}-fc" type="date" data-g="finConserv" value="${g.finConserv || ""}"><small>Si le plan impose une date plus tardive</small></label>
+      </div>
+      <div class="rel scroll"><table>
+        <thead><tr><th>Vesting</th><th>Actions</th><th>Cours $</th><th>$ pour 1 €</th><th class="n">Coût €</th><th class="n">France</th><th>Vendable</th><th>À vendre</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+        <tfoot><tr><td>Total</td><td class="mono" id="g${gi}-tq"></td><td colspan="2" class="muted" id="g${gi}-pmin"></td><td class="n" id="g${gi}-tv"></td><td></td><td></td><td class="mono" id="g${gi}-tvd"></td><td></td></tr></tfoot>
+      </table></div>
+      <div class="row-actions">
+        <button type="button" class="ghost small" data-act="add">Ajouter un vesting</button>
+        <button type="button" class="ghost small" data-act="gen">Générer un calendrier</button>
+        <button type="button" class="ghost small" data-act="paste">Coller depuis un tableur</button>
+        <button type="button" class="ghost small" data-act="all">Tout vendre</button>
+        <button type="button" class="ghost small" data-act="none">Ne rien vendre</button>
+      </div>
+      <div class="tool" data-tool="gen" hidden>
+        <h3>Générer un calendrier de vesting</h3>
+        <div class="fields">
+          <label class="f"><span class="l">Premier vesting</span><input id="g${gi}-gen-d" type="date" value="${g.dateGrant ? isoPlus(g.dateGrant, 12) : ""}"></label>
+          <label class="f"><span class="l">Fréquence</span><select id="g${gi}-gen-f"><option value="1">Mensuelle</option><option value="3" selected>Trimestrielle</option><option value="6">Semestrielle</option><option value="12">Annuelle</option></select></label>
+          <label class="f"><span class="l">Nombre de vestings</span><input id="g${gi}-gen-n" type="number" min="1" max="120" value="16"></label>
+          <label class="f"><span class="l">Actions par vesting</span><input id="g${gi}-gen-q" type="number" min="0" value="100"></label>
+          <label class="f"><span class="l">Cours du premier vesting ($)</span><input id="g${gi}-gen-c1" type="number" min="0" step="0.01" value="60"></label>
+          <label class="f"><span class="l">Cours du dernier vesting ($)</span><input id="g${gi}-gen-c2" type="number" min="0" step="0.01" value="260"></label>
+          <label class="f"><span class="l">Taux $ pour 1 €</span><input id="g${gi}-gen-fx" type="number" min="0" step="0.0001" value="1.10"></label>
+        </div>
+        <p class="muted" style="font-size:13px">Les cours sont interpolés de façon linéaire entre le premier et le dernier vesting, et le taux de change est le même partout. Remplacez ensuite chaque valeur par le cours et le taux réels du jour : ce sont eux qui comptent pour l'impôt.</p>
+        <div class="row-actions"><button type="button" class="small" data-act="gen-ok">Remplacer les vestings</button><button type="button" class="ghost small" data-act="gen-add">Ajouter à la suite</button></div>
+      </div>
+      <div class="tool" data-tool="paste" hidden>
+        <h3>Coller depuis un tableur</h3>
+        <p class="muted" style="font-size:13px">Une ligne par vesting : <span class="mono">date ; actions ; cours $ ; taux $ pour 1 € ; à vendre</span>. Séparateurs acceptés : tabulation, point-virgule. Dates au format 15/03/2024 ou 2024-03-15. La dernière colonne est facultative.</p>
+        <textarea id="g${gi}-paste" placeholder="15/03/2024;100;80;1,0901&#10;15/06/2024;45;90;1,0713"></textarea>
+        <p class="err" data-err hidden></p>
+        <div class="row-actions"><button type="button" class="small" data-act="paste-ok">Remplacer les vestings</button><button type="button" class="ghost small" data-act="paste-add">Ajouter à la suite</button></div>
       </div>`;
-    d.querySelectorAll("[data-f]").forEach(el => el.addEventListener("input", () => {
-      const k = el.dataset.f;
-      l[k] = el.type === "checkbox" ? el.checked : el.type === "number" ? (el.value === "" ? 0 : +el.value) : el.value;
+
+    el.querySelectorAll("[data-g]").forEach(inp => inp.addEventListener("input", () => { g[inp.dataset.g] = inp.value; sauver(); recalc(); }));
+    el.querySelectorAll("[data-r]").forEach(inp => inp.addEventListener("input", () => {
+      const r = g.releases[+inp.dataset.r];
+      r[inp.dataset.f] = inp.type === "number" ? (inp.value === "" ? 0 : +inp.value) : inp.value;
       sauver(); recalc();
     }));
-    d.querySelector("[data-del]").addEventListener("click", () => { S.lots.splice(i, 1); sauver(); renderLots(); recalc(); });
-    box.appendChild(d);
+    el.querySelectorAll("[data-delr]").forEach(b => b.addEventListener("click", () => { g.releases.splice(+b.dataset.delr, 1); sauver(); renderGrants(); recalc(); }));
+    el.querySelector("[data-delg]").addEventListener("click", () => { S.grants.splice(gi, 1); sauver(); renderGrants(); recalc(); });
+    el.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", () => action(g, gi, el, b.dataset.act)));
+    box.appendChild(el);
   });
 }
-document.getElementById("add-lot").addEventListener("click", () => {
-  const last = S.lots[S.lots.length - 1];
-  S.lots.push({ nom: "Nouveau lot", regime: last ? last.regime : "Q18", dateAcq: "2026-03-15", qte: 100, vendre: 0, fmv: 200, fx: 1.15, src: 100, conservOk: true });
-  sauver(); renderLots(); recalc();
+function isoPlus(d, mois) { const x = new Date(d); if (isNaN(x)) return ""; x.setMonth(x.getMonth() + mois); return x.toISOString().slice(0, 10); }
+
+function action(g, gi, el, act) {
+  const tool = n => el.querySelector(`[data-tool="${n}"]`);
+  const val = id => document.getElementById(`g${gi}-${id}`).value;
+  if (act === "add") {
+    const last = g.releases[g.releases.length - 1];
+    g.releases.push(last ? { date: isoPlus(last.date, 3), qte: last.qte, fmv: last.fmv, fx: last.fx, vendre: 0 } : { date: isoPlus(g.dateGrant || "2025-01-01", 12), qte: 100, fmv: 100, fx: 1.1, vendre: 0 });
+  } else if (act === "all") g.releases.forEach(r => r.vendre = r.qte);
+  else if (act === "none") g.releases.forEach(r => r.vendre = 0);
+  else if (act === "gen" || act === "paste") { const t = tool(act); t.hidden = !t.hidden; return; }
+  else if (act === "gen-ok" || act === "gen-add") {
+    const n = Math.max(1, Math.min(120, +val("gen-n") || 1)), freq = +val("gen-f") || 3, c1 = +val("gen-c1") || 0, c2 = +val("gen-c2") || 0;
+    const debut = val("gen-d"); if (!debut) return;
+    const neuf = Array.from({ length: n }, (_, k) => ({ date: isoPlus(debut, freq * k), qte: +val("gen-q") || 0, fmv: +(n > 1 ? c1 + (c2 - c1) * k / (n - 1) : c1).toFixed(2), fx: +val("gen-fx") || 1, vendre: 0 }));
+    g.releases = act === "gen-ok" ? neuf : g.releases.concat(neuf);
+  } else if (act === "paste-ok" || act === "paste-add") {
+    const res = lireCollage(val("paste")), err = tool("paste").querySelector("[data-err]");
+    if (!res.lignes.length) { err.hidden = false; err.textContent = res.erreurs.length ? res.erreurs.slice(0, 3).join(" ") : "Collez au moins une ligne."; return; }
+    if (res.erreurs.length) { err.hidden = false; err.textContent = res.erreurs.slice(0, 3).join(" ") + " Les autres lignes ont été importées."; } else err.hidden = true;
+    g.releases = act === "paste-ok" ? res.lignes : g.releases.concat(res.lignes);
+  }
+  g.releases.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  const msg = act.startsWith("paste") ? tool("paste").querySelector("[data-err]").textContent : "";
+  sauver(); renderGrants(); recalc();
+  if (msg) { const ng = document.querySelectorAll(".grant")[gi]; const t = ng.querySelector('[data-tool="paste"]'); const e = t.querySelector("[data-err]"); t.hidden = false; e.hidden = false; e.textContent = msg; }
+}
+
+function lireCollage(txt) {
+  const lignes = [], erreurs = [];
+  const num = s => { const x = parseFloat(String(s || "").replace(/\s| |\$|€/g, "").replace(",", ".")); return isNaN(x) ? null : x; };
+  txt.split(/\r?\n/).forEach((l, k) => {
+    if (!l.trim()) return;
+    const c = l.split(/\t|;/).map(x => x.trim());
+    let d = c[0], m;
+    if ((m = d.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/))) d = `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+    const q = num(c[1]), p = num(c[2]), fx = num(c[3]), v = c[4] != null ? num(c[4]) : 0;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || isNaN(new Date(d)) || q == null || p == null || fx == null) { erreurs.push(`Ligne ${k + 1} illisible (« ${l.slice(0, 40)} »).`); return; }
+    lignes.push({ date: d, qte: q, fmv: p, fx, vendre: v || 0 });
+  });
+  return { lignes, erreurs };
+}
+
+document.getElementById("add-grant").addEventListener("click", () => {
+  S.grants.push({ nom: `Attribution ${S.grants.length + 1}`, regime: "Q18", dateGrant: "", finConserv: "", releases: [] });
+  sauver(); renderGrants(); recalc();
 });
 
-function qtysCourantes() { return S.lots.map(l => Math.max(0, Math.floor(+l.vendre || 0))); }
+// ----- Calcul et affichage -----
+function qtysCourantes(X) { return X.lots.map(l => Math.max(0, Math.floor(+l.vendre || 0))); }
 
 function recalc() {
-  const r = evaluer(S, qtysCourantes());
+  const X = preparer(S);
+  const r = evaluer(X, qtysCourantes(X));
   const P = r.P;
   document.getElementById("res-year").textContent = P.label;
   document.getElementById("t-produit").textContent = fmt(r.produit);
   document.getElementById("t-impots").textContent = fmt(r.totalImpots);
   document.getElementById("t-net").textContent = fmt(r.net);
-  document.getElementById("t-taux").textContent = r.produit > 0 ? (r.tauxGlobal * 100).toFixed(1).replace(".", ",") + " %" : "—";
+  document.getElementById("t-taux").textContent = r.produit > 0 ? dec(r.tauxGlobal * 100, 1) + " %" : "—";
+
+  // valeurs calculées dans les tableaux de vestings
+  S.grants.forEach((g, gi) => {
+    let tq = 0, tv = 0, tvd = 0, pmin = Infinity, pmax = 0;
+    X.lots.filter(l => l.gi === gi).forEach(l => {
+      const ri = l.ri, eurU = l.fmv / l.fx;
+      tq += l.qte; tv += l.qte * eurU; tvd += l.vendre; pmin = Math.min(pmin, l.fmv); pmax = Math.max(pmax, l.fmv);
+      const set = (id, h) => { const e = document.getElementById(`g${gi}-r${ri}-${id}`); if (e) e.innerHTML = h; };
+      set("eur", dec(eurU));
+      set("src", Math.round(l.src) + " %");
+      set("cess", g.regime === "NQ" ? `<span class="chip ok">libre</span>` : l.conservOk ? `<span class="chip ok">oui</span>` : `<span class="chip lock" title="Vendable à partir du ${formatDate(l.cessible)}">dès ${formatDate(l.cessible)}</span>`);
+    });
+    const s = (id, t) => { const e = document.getElementById(`g${gi}-${id}`); if (e) e.textContent = t; };
+    s("tq", nb.format(tq)); s("tv", fmt(tv)); s("tvd", nb.format(tvd));
+    s("pmin", isFinite(pmin) ? `cours de ${dec(pmin)} $ à ${dec(pmax)} $` : "");
+  });
 
   const tb = document.querySelector("#tab-lignes tbody");
   tb.innerHTML = r.lignes.filter(l => Math.abs(l.montant) >= 0.5 || l.id === "ir").map(l => `<tr><td>${l.lib}<span class="ref">${l.ref}</span></td><td class="n">${l.assiette != null ? fmt(l.assiette) : ""}</td><td class="n">${fmt(l.montant)}</td></tr>`).join("")
     + `<tr class="total"><td>Total</td><td></td><td class="n">${fmt(r.totalImpots)}</td></tr>`;
 
   const tl = document.querySelector("#tab-lots tbody");
-  tl.innerHTML = r.lots.map(d => `<tr><td>${esc(d.nom)}<span class="ref">${REGIMES[d.regime]}</span></td><td class="n">${nb.format(d.q)}</td><td class="n">${d.regime === "NQ" ? (d.salaireNQ ? fmt(d.salaireNQ) + "*" : "déjà imposé") : fmt(d.gainImpose)}</td><td class="n">${fmt(d.pv)}</td><td class="n">${d.abattement ? fmt(d.abattement) : "—"}</td><td class="n">${fmt(d.imposableBareme)}</td></tr>`).join("");
+  tl.innerHTML = r.lots.filter(d => d.q > 0 || d.salaireNQ).map(d => `<tr><td>${esc(d.nom)}<span class="ref">${d.horsRegime ? "Imposé comme un salaire (vente trop tôt)" : REGIMES[d.regime]}</span></td><td class="n">${nb.format(d.q)}</td><td class="n">${dec(d.fmvEUR)}</td><td class="n">${Math.round(d.src * 100)} %</td><td class="n">${d.regime === "NQ" ? (d.salaireNQ ? fmt(d.salaireNQ) + " (salaire)" : "déjà imposé") : fmt(d.gainImpose)}</td><td class="n">${fmt(d.pv)}</td><td class="n">${d.abattement ? fmt(d.abattement) : "—"}</td><td class="n">${fmt(d.imposableBareme)}</td></tr>`).join("")
+    || `<tr><td colspan="8" class="muted">Aucune action à vendre. Indiquez des quantités dans la colonne « À vendre ».</td></tr>`;
 
-  r.lots.forEach(d => {
-    const h = document.getElementById(`lot-${d.i}-hint`);
-    if (h) h.textContent = `Cours au vesting en euros : ${d.fmvEUR.toFixed(2).replace(".", ",")} € · prix net de vente ${r.prixNetEUR.toFixed(2).replace(".", ",")} € · plus-value par action ${(r.prixNetEUR - d.fmvEUR).toFixed(2).replace(".", ",")} €`;
-  });
-
-  notes(r);
-  optimisation(r);
+  notes(r, X);
+  optimisation(r, X);
 }
-function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 
-function notes(r) {
+function notes(r, X) {
   const P = r.P, out = [];
-  r.alertes.forEach(a => out.push(["bad", a]));
+  [...new Set(r.alertes)].forEach(a => out.push(["bad", a]));
   if (P.provisoire) out.push(["warn", "<b>Barème 2026 provisoire.</b> La loi de finances pour 2027 qui fixera le barème des revenus 2026 n'est pas encore votée : le barème des revenus 2025 est reconduit."]);
   const sur300 = r.lots.reduce((a, d) => a + (d.sur300 || 0), 0);
-  if (sur300 > 0) out.push(["warn", `<b>${fmt(sur300)} de gain dépasse le seuil annuel de 300 000 €.</b> Cette part perd l'abattement de 50 % et supporte 9,7 % de CSG/CRDS plus 10 % de contribution salariale. Reporter une partie des ventes à l'année suivante peut l'éviter.`]);
-  if (r.avec.cehr - r.base.cehr > 0) out.push(["warn", `<b>La vente déclenche ${fmt(r.avec.cehr - r.base.cehr)} de CEHR</b> (revenu fiscal de référence : ${fmt(r.avec.rfr)}). Si vos deux RFR précédents étaient sous le seuil, renseignez-les dans les réglages avancés pour bénéficier du lissage.`]);
+  if (sur300 > 0) out.push(["warn", `<b>${fmt(sur300)} de gain dépasse le seuil annuel de 300 000 €.</b> Cette part perd l'abattement de 50 % et supporte 9,7 % de CSG/CRDS plus 10 % de contribution salariale. Reporter une partie des ventes au 1er janvier suivant peut l'éviter.`]);
+  const vendus = r.lots.filter(d => d.q > 0 && d.regime !== "NQ");
+  if (vendus.length > 1) {
+    const c = vendus.map(d => d.fmvEUR), mn = Math.min(...c), mx = Math.max(...c);
+    if (mx > mn * 1.2) out.push(["", `<b>Vos vestings vendus ont des coûts de ${dec(mn)} € à ${dec(mx)} € par action.</b> À votre taux marginal, un vesting à coût bas laisse une plus-value plus grande (taxée à 31,4 %) et un gain d'acquisition plus faible (taxé au barème après abattement + 18,6 %). La section « Combien d'actions vendre ? » choisit les vestings les moins taxés.`]);
+  }
+  const bloques = X.lots.filter(l => l.regime !== "NQ" && !l.conservOk && l.qte > 0);
+  if (bloques.length) {
+    const next = bloques.map(l => l.cessible).sort((a, b) => a - b)[0];
+    out.push(["warn", `<b>${nb.format(bloques.reduce((a, l) => a + l.qte, 0))} actions ne sont pas encore vendables sans perdre le régime</b> (délai d'attribution + 2 ans ou conservation du plan). Les premières le deviennent le ${formatDate(next)}.`]);
+  }
+  if (r.avec.cehr - r.base.cehr > 0) out.push(["warn", `<b>La vente déclenche ${fmt(r.avec.cehr - r.base.cehr)} de CEHR</b> (revenu fiscal de référence : ${fmt(r.avec.rfr)}). Si vos deux RFR précédents étaient sous le seuil, renseignez-les dans les réglages pour bénéficier du lissage.`]);
   if (r.avec.cdhr - r.base.cdhr > 0) out.push(["warn", `<b>Contribution différentielle de ${fmt(r.avec.cdhr - r.base.cdhr)}.</b> Vos impôts n'atteignent pas 20 % de votre revenu : étaler les ventes peut la réduire.`]);
   if (r.pvNette > 0) {
     const d = r.avecBar.total - r.avecPFU.total;
     out.push(["", `<b>Plus-value :</b> ${r.option === "pfu" ? "le prélèvement forfaitaire" : "l'option pour le barème"} est retenu. ${Math.abs(d) < 1 ? "Les deux options coûtent la même chose." : `L'autre option coûterait ${fmt(Math.abs(d))} de ${d > 0 === (r.option === "pfu") ? "plus" : "moins"}.`} Votre taux marginal d'imposition (quotient familial plafonné compris) est de ${Math.round(r.avec.tmi * 100)} %.`]);
   }
-  if (r.mvNouvelle > 0) out.push(["", `Moins-value nette de ${fmt(r.mvNouvelle)} sur les lots non qualifiés : imputable sur vos plus-values des 10 prochaines années.`]);
+  if (r.mvNouvelle > 0) out.push(["", `Moins-value nette de ${fmt(r.mvNouvelle)} : imputable sur vos plus-values des 10 prochaines années.`]);
   if (r.economieN1 > 1) out.push(["", `<b>CSG déductible :</b> environ ${fmt(r.csgDedN1)} viendront en déduction de votre revenu imposable de l'année suivante, soit une économie d'environ ${fmt(r.economieN1)} à votre taux marginal actuel.`]);
   if (r.produit > 0) out.push(["", `<b>Trésorerie :</b> l'impôt sur le gain et la plus-value d'un plan qualifié est liquidé après votre déclaration de revenus de l'année suivante, avec les prélèvements sociaux et la contribution salariale. Mettez de côté ${fmt(r.totalImpots)} dès la vente.`]);
-  out.push(["", "Un compte titres ouvert chez un courtier américain (Morgan Stanley, Schwab, Fidelity, E*Trade…) se déclare chaque année avec le formulaire n° 3916 (CGI art. 1649 A)."]);
+  out.push(["", "Un compte titres ouvert chez un courtier étranger (ShareWorks, Morgan Stanley, Schwab, Fidelity, E*Trade…) se déclare chaque année avec le formulaire n° 3916 (CGI art. 1649 A)."]);
   document.getElementById("notes").innerHTML = out.map(([c, t]) => `<div class="note ${c}">${t}</div>`).join("");
 }
 
 let derniereCible = null;
-function optimisation(r) {
-  const pts = courbe(S, 70);
-  dessiner(pts, r);
-  // objectif net
+function optimisation(r, X) {
+  const pts = courbe(X, 70);
+  dessiner(pts, r, X);
   const cible = +document.getElementById("o-cible").value || 0;
-  const res = pourNet(S, cible);
+  const res = pourNet(X, cible);
   const box = document.getElementById("o-cible-res");
   if (!res.atteignable) {
     derniereCible = null;
-    box.innerHTML = `<p>Même en vendant tout, le net atteint ${fmt(res.max.net)}.</p>`;
+    box.innerHTML = `<p>Même en vendant tous les vestings disponibles, le net atteint ${fmt(res.max.net)}.</p>`;
   } else {
     derniereCible = res.q;
-    const rr = res.r || evaluer(S, res.q);
+    const rr = res.r || evaluer(X, res.q);
     const n = res.q.reduce((a, b) => a + b, 0);
-    box.innerHTML = `<p class="big">${nb.format(n)} actions</p><p class="muted">${res.q.map((x, i) => x ? `${nb.format(x)} du lot « ${esc(S.lots[i].nom)} »` : "").filter(Boolean).join(", ") || "Aucune vente"}. Net ${fmt(rr.net)} pour ${fmt(rr.totalImpots)} d'impôts.</p>`;
+    const detail = res.q.map((x, i) => x ? `${nb.format(x)} du ${esc(X.lots[i].nom)}` : "").filter(Boolean);
+    box.innerHTML = `<p class="big">${nb.format(n)} actions</p><p class="muted">${detail.slice(0, 6).join(", ")}${detail.length > 6 ? `, et ${detail.length - 6} autres vestings` : ""}${detail.length ? "." : "Aucune vente."} Net ${fmt(rr.net)} pour ${fmt(rr.totalImpots)} d'impôts.</p>`;
   }
-  // 300k
-  const cap = capacite300(S);
+  const cap = capacite300(X).filter(c => c.n > 0);
   const b3 = document.getElementById("o-300");
-  if (!cap.length) b3.innerHTML = `<p class="muted">Aucun lot soumis au seuil de 300 000 € (plans d'AGE à partir du 31/12/2016).</p>`;
+  if (!X.lots.some(l => l.regime === "Q18" || l.regime === "Q17")) b3.innerHTML = `<p class="muted">Aucun vesting soumis au seuil de 300 000 € (plans d'AGE à partir du 31/12/2016).</p>`;
   else {
     const tot = cap.reduce((a, c) => a + c.n, 0);
-    b3.innerHTML = `<p class="big">${nb.format(tot)} actions</p><p class="muted">au plus cette année, au prix actuel, avant que le gain d'acquisition dépasse 300 000 € : ${cap.map(c => `${nb.format(c.n)} du lot « ${esc(c.nom)} »`).join(", ")}. Le seuil repart à zéro chaque 1er janvier.</p>`;
+    b3.innerHTML = `<p class="big">${nb.format(tot)} actions</p><p class="muted">au plus cette année, au prix actuel, avant que le gain d'acquisition dépasse 300 000 €, en vendant d'abord les vestings au coût le plus bas${(+S.foyer.gainDeja || 0) > 0 ? " et compte tenu des gains déjà réalisés" : ""}. Le seuil repart à zéro chaque 1er janvier.</p>`;
   }
-  // étalement
-  const et = etalement(S, qtysCourantes(), 4);
+  const et = etalement(X, qtysCourantes(X), 4);
   const be = document.getElementById("o-etal");
   if (!r.totalQ) be.innerHTML = `<p class="muted">Indiquez des actions à vendre pour comparer.</p>`;
   else be.innerHTML = `<div class="scroll"><table><thead><tr><th>Sur</th><th class="n">Impôts</th><th class="n">Écart</th></tr></thead><tbody>${et.map(e => `<tr><td>${e.n} an${e.n > 1 ? "s" : ""}</td><td class="n">${fmt(e.impots)}</td><td class="n">${e.n === 1 ? "—" : fmt(e.impots - et[0].impots)}</td></tr>`).join("")}</tbody></table></div><p class="muted" style="font-size:13px">Même cours, mêmes revenus et mêmes règles chaque année. Attendre expose au risque de baisse du cours et au change.</p>`;
@@ -694,11 +914,12 @@ function optimisation(r) {
 document.getElementById("o-cible").addEventListener("input", () => recalc());
 document.getElementById("o-apply").addEventListener("click", () => {
   if (!derniereCible) return;
-  S.lots.forEach((l, i) => l.vendre = derniereCible[i]);
-  sauver(); renderLots(); recalc();
+  const X = preparer(S);
+  X.lots.forEach((l, i) => { S.grants[l.gi].releases[l.ri].vendre = derniereCible[i]; });
+  sauver(); renderGrants(); recalc();
 });
 
-function dessiner(pts, r) {
+function dessiner(pts, r, X) {
   const svg = document.getElementById("chart");
   const W = 900, H = 300, m = { l: 70, r: 20, t: 16, b: 36 };
   const maxN = pts[pts.length - 1].n || 1;
@@ -712,17 +933,14 @@ function dessiner(pts, r) {
   const xs = niceStep(maxN / 6);
   for (let n = 0; n <= maxN; n += xs) g += `<text x="${x(n)}" y="${H - m.b + 18}" text-anchor="middle">${nb.format(n)}</text>`;
   g += `<text x="${W - m.r}" y="${H - 4}" text-anchor="end">actions vendues</text>`;
-  // seuil 300k : premier point où une part du gain dépasse 300 k€
   let seuilN = null;
-  for (const p of pts) { const rr = evaluer(S, p.q); if (rr.baseContrib > 0 && rr.lots.some(d => d.sur300 > 0)) { seuilN = p.n; break; } }
+  for (const p of pts) { const rr = evaluer(X, p.q); if (rr.lots.some(d => d.sur300 > 0)) { seuilN = p.n; break; } }
   if (seuilN != null) g += `<line x1="${x(seuilN)}" x2="${x(seuilN)}" y1="${m.t}" y2="${H - m.b}" stroke="var(--muted)" stroke-dasharray="4 4" stroke-width="1"/><text x="${x(seuilN) + 6}" y="${m.t + 12}">300 k€</text>`;
   const path = k => pts.map((p, i) => `${i ? "L" : "M"}${x(p.n).toFixed(1)},${y(p[k]).toFixed(1)}`).join("");
   g += `<path d="${path("impots")}" fill="none" stroke="var(--s2)" stroke-width="2" stroke-linejoin="round"/>`;
   g += `<path d="${path("net")}" fill="none" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round"/>`;
-  // position actuelle
   const nCur = r.totalQ;
   if (nCur > 0 && nCur <= maxN) g += `<circle cx="${x(nCur)}" cy="${y(r.net)}" r="5" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"/><circle cx="${x(nCur)}" cy="${y(r.totalImpots)}" r="5" fill="var(--s2)" stroke="var(--surface)" stroke-width="2"/>`;
-  const last = pts[pts.length - 1];
   g += `<g id="hover" visibility="hidden"><line id="hx" y1="${m.t}" y2="${H - m.b}" stroke="var(--ink)" stroke-width="1" opacity=".35"/><circle id="h1" r="4" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"/><circle id="h2" r="4" fill="var(--s2)" stroke="var(--surface)" stroke-width="2"/></g>`;
   g += `<rect x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent" id="hit"/>`;
   svg.innerHTML = g;
@@ -737,8 +955,8 @@ function dessiner(pts, r) {
     svg.querySelector("#hx").setAttribute("x1", x(best.n)); svg.querySelector("#hx").setAttribute("x2", x(best.n));
     svg.querySelector("#h1").setAttribute("cx", x(best.n)); svg.querySelector("#h1").setAttribute("cy", y(best.net));
     svg.querySelector("#h2").setAttribute("cx", x(best.n)); svg.querySelector("#h2").setAttribute("cy", y(best.impots));
-    const taux = best.produit > 0 ? ((best.impots / best.produit) * 100).toFixed(1).replace(".", ",") + " %" : "—";
-    tip.innerHTML = `${nb.format(best.n)} actions<br><span style="color:var(--s1)">●</span> Net ${fmt(best.net)}<br><span style="color:var(--s2)">●</span> Impôts ${fmt(best.impots)}<br>Taux global ${taux}<br>Taux marginal ${best.marg && isFinite(best.marg) ? (best.marg * 100).toFixed(1).replace(".", ",") + " %" : "—"}`;
+    const taux = best.produit > 0 ? dec(best.impots / best.produit * 100, 1) + " %" : "—";
+    tip.innerHTML = `${nb.format(best.n)} actions<br><span style="color:var(--s1)">●</span> Net ${fmt(best.net)}<br><span style="color:var(--s2)">●</span> Impôts ${fmt(best.impots)}<br>Taux global ${taux}<br>Taux marginal ${best.marg && isFinite(best.marg) ? dec(best.marg * 100, 1) + " %" : "—"}`;
     tip.hidden = false;
     const br = box.getBoundingClientRect();
     let left = ev.clientX - br.left + 14; if (left + 190 > br.width) left = ev.clientX - br.left - 200;
@@ -747,11 +965,12 @@ function dessiner(pts, r) {
   hit.addEventListener("pointerleave", () => { hov.setAttribute("visibility", "hidden"); tip.hidden = true; });
 }
 function niceStep(v) { if (v <= 0) return 1; const p = Math.pow(10, Math.floor(Math.log10(v))); const f = v / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p; }
-function abbr(v) { return v >= 1e6 ? (v / 1e6).toFixed(1).replace(".", ",") + " M€" : v >= 1e3 ? Math.round(v / 1e3) + " k€" : Math.round(v) + " €"; }
+function abbr(v) { return v >= 1e6 ? dec(v / 1e6, 1) + " M€" : v >= 1e3 ? Math.round(v / 1e3) + " k€" : Math.round(v) + " €"; }
 
 bindStatic();
-renderLots();
+renderGrants();
 recalc();
+
 </script>
 
 </body>
