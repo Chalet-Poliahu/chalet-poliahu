@@ -799,7 +799,7 @@ const CUTS=[
   {x0:.0,x1:7.5,y0:10.0,y1:15.45,base:-.25,inside:-3.45},
   {x0:7.2,x1:12.72,y0:6.9,y1:15.45,base:-.08,inside:-.45},
   {x0:11.83,x1:12.95,y0:3.1,y1:7.25,base:-5.8,inside:-5.8},
-  {x0:11.83,x1:17.5,y0:7.45,y1:10.3,base:-3.1,inside:-3.1},           // remblai derrière le mur de soutènement prolongé (terrasse au niveau R-1)
+  {x0:11.83,x1:18.25,y0:7.45,y1:10.3,base:-3.1,inside:-3.1},           // remblai derrière le mur de soutènement prolongé (terrasse au niveau R-1)
 ];
 const ROAD={y0:20.8,y1:24.6,z:X=>3.45+.045*(X-10)};
 // rampe d'accès (plan RDC / plan de masse) : surface pavée d'un seul tenant entre le chemin du Passet et le parvis,
@@ -897,7 +897,7 @@ function Hbase(X,Y){
   // R-2 : plate-forme 5 × 6 m devant la salle de sport, au pied du mur de soutènement (déblai/remblai 1/1 autour)
   if(Y<7.35){const dx=Math.max(11.83-X,0,X-16.83),dy=Math.max(1.25-Y,0,Y-7.25),d=Math.hypot(dx,dy);z=d===0?-5.82:Math.min(Math.max(z,-5.82-d),-5.82+.85*d);}
   // R-1 : remblai plat derrière le mur de soutènement prolongé, au niveau de la chambre parentale (sous la terrasse bois)
-  if(X>11.83&&X<17.5&&Y>7.45&&(Y<10.3&&!inPoly(X,Y,RPOLY)||X>12.9&&Y<10.9))z=-3.1;   // (y compris sous le bord de la rampe, caché par le mur)
+  if(X>11.83&&X<18.25&&Y>7.45&&(Y<10.3&&!inPoly(X,Y,RPOLY)||X>12.9&&Y<10.9))z=-3.1;   // (y compris sous le bord de la rampe, caché par le mur)
   if(X>11.0&&Y>15.2&&Math.hypot(X-11.1,Y-15.32)<1.98)z=1.12;           // massif planté entre les deux murs de soutènement (jusque sous la couvertine)
   else if(inPoly(X,Y,RPOLY))z-=.2;                                       // terrain sous le pavage de la rampe (ne le perce plus)
   // terrain modelé du chalet voisin Dhommée
@@ -1122,10 +1122,31 @@ function buildHouse(){
      obox(c[0]+Math.cos(am)*1.82,c[1]+Math.sin(am)*1.82,zt-.06,zt+.02,R*(a1-a0)*1.13+.06,.48,am+Math.PI/2,MAT.stone,9);}}
   // cour SE dallée devant la porte du R-2
   bx(11.83,12.95,3.1,7.25,-5.8,-5.74,MAT.paving,9,{cast:false});
-  wall({lv:9,a:[11.82,7.35],b:[17.5,7.35],z0:-5.95,top:-3.1,t:.2,int:st,floor:-5.8});   // mur de soutènement perpendiculaire à la façade (plan R-2), prolongé de 4 m
+  wall({lv:9,a:[11.82,7.35],b:[18.25,7.35],z0:-5.95,top:-3.1,t:.2,int:st,floor:-5.8});   // mur de soutènement perpendiculaire à la façade (plan R-2), prolongé de 4 m (+0,75 m sous le palier de l'escalier)
   // terrasse bois 4 m au niveau de la chambre parentale sur le remblai, dans le prolongement du balcon, garde-corps le long du vide et en bout
   slab([13.0,17.0,7.45,10.2],Z1,.2,9,MAT.deck,MAT.deck);
-  railing(12.95,7.5,17.0,7.5,Z1,9,1.0);railing(17.0,7.5,17.0,10.2,Z1,9,1.0);
+  railing(12.95,7.5,17.0,7.5,Z1,9,1.0);railing(17.0,8.7,17.0,10.2,Z1,9,1.0);
+  // escalier extérieur en mélèze : palier en bout de terrasse (en partie en encorbellement au-dessus du mur, sur 2 poteaux),
+  // puis volée droite le long de la face du mur de soutènement jusqu'à la plate-forme du R-2 (16 hauteurs de 18,3 cm, giron 26 cm, sans contremarches)
+  {const L=MAT.larchExt,xt=16.95,zb=-5.82,n=16,h=(Z1-zb)/n,g=.26,y0=6.25,y1=7.2,xb=xt-(n-1)*g;
+   slab([xt,18.15,6.2,8.75],Z1,.2,9,MAT.deck,MAT.deck);                                                       // palier
+   railing(17.0,8.7,18.1,8.7,Z1,9,1.0);railing(18.1,6.25,18.1,8.7,Z1,9,1.0);railing(xt,6.25,18.1,6.25,Z1,9,1.0);
+   for(const x of[17.03,18.07]){const zg=Hbase(x,6.27);bx(x-.06,x+.06,6.21,6.33,zg-.1,Z1-.2,L,9);bx(x-.1,x+.1,6.17,6.37,zg-.12,zg+.06,MAT.concrete,9);} // poteaux 12×12 sur plots
+   bx(xt,18.15,6.2,6.34,Z1-.4,Z1-.2,MAT.beam,9);                                                                // poutre de rive sous le palier
+   const ln=x=>Z1-h-(xt-x)/g*h;                                                                                // ligne des nez de marche
+   const beam=(xa,za,xb2,zb2,y,w,d,m)=>{const A=L3(xa,y,za),B=L3(xb2,y,zb2),dd=B.clone().sub(A),gg=new THREE.BoxGeometry(dd.length(),d,w);
+     gg.rotateZ(Math.atan2(dd.y,dd.x));const c=A.add(B).multiplyScalar(.5);gg.translate(c.x,c.y,c.z);addGeo(gg,m,9);};
+   for(const y of[y0+.03,y1-.03])beam(xb-.12,zb-.06,xt,ln(xt)-.02,y,.06,.3,L);                                  // limons
+   for(let k=1;k<n;k++){const x1=xt-(k-1)*g+.03,x0=xt-k*g,zt=Z1-k*h;bx(x0,x1,y0+.06,y1-.06,zt-.045,zt,MAT.deck,9);WALK.push({x0,x1:x1-.03,y0,y1,z:zt});} // marches 4,5 cm
+   bx(xb-.35,xb+.05,y0-.05,y1,zb-.06,zb+.01,MAT.paving,9,{cast:false});                                        // dalle de réception
+   // garde-corps côté vide : main courante et lisse inclinées, barreaudage vertical comme le balcon, 3 poteaux
+   beam(xb,ln(xb)+.95,xt,ln(xt)+.95,y0-.01,.14,.07,L);beam(xb,ln(xb)+.16,xt,ln(xt)+.16,y0-.01,.09,.08,L);
+   for(const x of[xb+.05,(xb+xt)/2,xt-.06])bx(x-.06,x+.06,y0-.07,y0+.05,ln(x)-.3,ln(x)+.98,L,9);
+   for(let x=xb+.17;x<xt-.1;x+=.12)bx(x-.02,x+.02,y0-.03,y0+.01,ln(x)+.2,ln(x)+.92,L,9);
+   COLL.push({ax:xb,ay:y0,ux:1,uy:0,s0:0,s1:xt-xb,t:.1,zmin:zb,zmax:Z1+1,lv:9});
+   // main courante ronde côté mur sur consoles acier noir
+   {const a=L3(xb,y1-.02,ln(xb)+.9),b=L3(xt,y1-.02,ln(xt)+.9);cylAlong(xb,y1-.02,ln(xb)+.9,xt,y1-.02,ln(xt)+.9,.025,L,9,10);
+    for(const x of[xb+.3,(xb+xt)/2,xt-.3])bx(x-.01,x+.01,y1-.02,7.25,ln(x)+.84,ln(x)+.87,MAT.black,9);}}
 
   /* ----- escaliers (15 marches 15g × 28 / 17,19) ----- */
   // cage d'escalier : faces intérieures des murs extérieurs (NO) en blanc
