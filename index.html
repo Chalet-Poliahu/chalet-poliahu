@@ -799,13 +799,8 @@ const CUTS=[
   {x0:.0,x1:7.5,y0:10.0,y1:15.45,base:-.25,inside:-3.45},
   {x0:7.2,x1:12.72,y0:6.9,y1:15.45,base:-.08,inside:-.45},
   {x0:11.83,x1:12.95,y0:3.1,y1:7.25,base:-5.8,inside:-5.8},
-  {x0:11.83,x1:19.2,y0:7.45,y1:10.3,base:-3.1,inside:-3.1},           // remblai derrière le mur de soutènement prolongé (terrasse au niveau R-1)
+  {x0:11.83,x1:17.5,y0:7.45,y1:10.3,base:-3.1,inside:-3.1},           // remblai derrière le mur de soutènement prolongé (terrasse au niveau R-1)
 ];
-// chemin de marches en pierre au bout du mur de soutènement : descend vers la vallée, parallèle à la façade latérale du chalet,
-// de la terrasse haute (-3,10) à la plate-forme du R-2 (-5,82) : 16 hauteurs de 17 cm, giron 36 cm (marches de jardin)
-const PST={x0:17.66,x1:18.9,yt:7.9,zt:-3.1,zb:-5.82,n:16,g:.36};PST.h=(PST.zt-PST.zb)/PST.n;PST.yb=PST.yt-(PST.n-1)*PST.g;
-const pstTop=Y=>{if(Y>=PST.yt)return PST.zt;const k=Math.ceil((PST.yt-Y)/PST.g);return k>=PST.n?PST.zb:PST.zt-k*PST.h;};
-const pstLin=Y=>PST.zb+(PST.zt-PST.zb)*clamp((Y-PST.yb)/(PST.yt-PST.yb),0,1);
 const ROAD={y0:20.8,y1:24.6,z:X=>3.45+.045*(X-10)};
 // rampe d'accès (plan RDC / plan de masse) : surface pavée d'un seul tenant entre le chemin du Passet et le parvis,
 // descendant en courbe à 20 % et s'élargissant sur toute la largeur devant les garages
@@ -905,13 +900,6 @@ function Hbase(X,Y){
   if(X>11.83&&X<17.5&&Y>7.45&&(Y<10.3&&!inPoly(X,Y,RPOLY)||X>12.9&&Y<10.9))z=-3.1;   // (y compris sous le bord de la rampe, caché par le mur)
   if(X>11.0&&Y>15.2&&Math.hypot(X-11.1,Y-15.32)<1.98)z=1.12;           // massif planté entre les deux murs de soutènement (jusque sous la couvertine)
   else if(inPoly(X,Y,RPOLY))z-=.2;                                       // terrain sous le pavage de la rampe (ne le perce plus)
-  // chemin de marches en pierre : terrain modelé le long des marches, entre deux murets de pierre, raccordé au talus naturel à l'Est
-  if(X>=17.5&&X<19.2&&Y>=7.9&&Y<10.95)z=-3.1;                                                        // (y compris sous le bord de la rampe, caché par son mur)                                      // palier haut, dans le prolongement du remblai
-  if(X>16.83&&X<17.36&&Y>1.25&&Y<7.36)z=-5.82;                                                          // pied du muret Ouest, au niveau de la plate-forme
-  if(X>19.2&&X<21.5&&Y>10.2&&Y<11.7)z=Math.min(z,-3.1+.85*(X-19.2));                                  // sous le bord de la rampe, au droit du talus (pas de pointes au pied du mur)
-  if(X>=17.36&&X<=19.2&&Y>1.75&&Y<7.9)z=pstLin(Y)-.36;                                                   // sous les marches
-  if(X>16.83&&X<=19.2&&Y>1.75&&Y<=PST.yb+.05)z=-5.84;                                                   // palier bas
-  if(X>19.2&&X<24&&Y>1.0&&Y<8.0){const d=X-19.2,t=pstLin(clamp(Y,PST.yb,PST.yt))+.55;z=Math.max(Math.min(z,t+.85*d),t-d);}
   // terrain modelé du chalet voisin Dhommée
   z=DHT.adjust(z,X,Y);
   return z;
@@ -1137,25 +1125,7 @@ function buildHouse(){
   wall({lv:9,a:[11.82,7.35],b:[17.5,7.35],z0:-5.95,top:-3.1,t:.2,int:st,floor:-5.8});   // mur de soutènement perpendiculaire à la façade (plan R-2), prolongé de 4 m
   // terrasse bois 4 m au niveau de la chambre parentale sur le remblai, dans le prolongement du balcon, garde-corps le long du vide et en bout
   slab([13.0,17.0,7.45,10.2],Z1,.2,9,MAT.deck,MAT.deck);
-  railing(12.95,7.5,17.0,7.5,Z1,9,1.0);railing(17.0,8.85,17.0,10.2,Z1,9,1.0);                  // bout de terrasse ouvert vers le chemin de pierre
-  // chemin de marches en pierre au bout du mur de soutènement (voir PST) : blocs-marches en pierre, murets de pierre de part et d'autre
-  {const{x0,x1,yt,zt,zb,n,g,h,yb}=PST;
-   bx(17.0,x1+.15,yt,8.85,zt-.1,zt+.02,MAT.paving,9,{cast:false});WALK.push({x0:17.0,x1:x1+.15,y0:yt,y1:8.85,z:zt+.02});          // palier haut dallé
-   for(let k=1;k<n;k++){const ya=yt-k*g,yz=yt-(k-1)*g+.03,top=zt-k*h;bx(x0,x1,ya,yz,top-.32,top,MAT.stone,9);WALK.push({x0,x1,y0:ya,y1:yz-.03,z:top});} // blocs-marches
-   bx(16.83,x1+.15,yb-.75,yb+.03,zb-.06,zb+.01,MAT.paving,9,{cast:false});WALK.push({x0:16.83,x1:x1+.15,y0:yb-.75,y1:yb,z:zb+.01});  // palier bas dallé
-   const wl=(a,b,top)=>wall({lv:9,a,b,z0:-6.0,top,t:.3,int:st,ext:st,floor:zb,skirt:false,noColl:false});
-   wl([17.5,7.35],[17.5,yb-.05],(X,Y)=>Math.max(pstLin(Y)+.18,zb+.25));                                                  // muret Ouest (côté plate-forme)
-   wl([19.05,yb-.75],[19.05,8.85],(X,Y)=>pstLin(Y)+.55);                                                                   // muret Est (retient le talus)
-   for(let y=yb-.75;y<8.8;y+=.5){const zt2=pstLin(y+.25)+.55;bx(18.88,19.22,y,y+.5,zt2-.02,zt2+.05,MAT.stone,9);}          // couvertine Est
-   for(let y=yb-.05;y<7.3;y+=.5){const zt2=Math.max(pstLin(y+.25)+.18,zb+.25);bx(17.33,17.67,y,y+.5,zt2-.02,zt2+.05,MAT.stone,9);} // couvertine Ouest
-   // garde-corps rustique en mélèze sur le muret Ouest, là où la chute vers la plate-forme dépasse ~60 cm
-   const yg=yb+1.6,beam=(ya,za,yb2,zb2,x,w,d,m)=>{const A=L3(x,ya,za),B=L3(x,yb2,zb2),dd=B.clone().sub(A),gg=new THREE.BoxGeometry(w,d,dd.length());
-     gg.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,0,1),dd.clone().normalize()));const c=A.add(B).multiplyScalar(.5);gg.translate(c.x,c.y,c.z);addGeo(gg,m,9);};
-   const ps=[];for(let y=yg;y<=7.3;y+=1.15)ps.push(y);ps.push(7.3);
-   for(const y of ps){const zt2=pstLin(y)+.25;cyl(17.5,y,zt2,zt2+1.0,.06,MAT.larchExt,9,8);}
-   beam(yg,pstLin(yg)+1.2,7.3,pstLin(7.3)+1.2,17.5,.1,.07,MAT.larchExt);beam(yg,pstLin(yg)+.75,7.3,pstLin(7.3)+.75,17.5,.08,.06,MAT.larchExt);
-   COLL.push({ax:17.5,ay:yg,ux:0,uy:1,s0:0,s1:7.3-yg,t:.3,zmin:zb,zmax:zt+1,lv:9});
-   railing(17.0,7.5,17.5,7.5,zt,9,1.0);}                                                                                    // garde-corps au-dessus de l'about du mur
+  railing(12.95,7.5,17.0,7.5,Z1,9,1.0);railing(17.0,7.5,17.0,10.2,Z1,9,1.0);
 
   /* ----- escaliers (15 marches 15g × 28 / 17,19) ----- */
   // cage d'escalier : faces intérieures des murs extérieurs (NO) en blanc
@@ -1858,7 +1828,7 @@ function buildSite(){
    const gg=new THREE.BufferGeometry();gg.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));gg.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));gg.setIndex(idx);gg.computeVertexNormals();addGeo(gg,MAT.asphalt,9,{cast:false});}
   // arbustes d'essences locales sur les talus : genévrier, épine-vinette, houx
   const R=rng(77);const shrubM=[MAT.juniper,MAT.berberis,MAT.holly];
-  const spots=[[-2.5,1],[-3,4.5],[-2.6,8],[-2.2,11],[-1.8,14.5],[1.5,17.3],[5,17.6],[18.4,.0],[20.6,4.2],[20.9,8.4],[-3,-3.5],[3,-4.3],[9,-4.2],[14,-3.6],[19.5,10],[20.6,15],[5.5,17.9],[-4.5,-1]];
+  const spots=[[-2.5,1],[-3,4.5],[-2.6,8],[-2.2,11],[-1.8,14.5],[1.5,17.3],[5,17.6],[18.4,.2],[18.9,4.2],[19.3,8.2],[-3,-3.5],[3,-4.3],[9,-4.2],[14,-3.6],[19.5,10],[20.6,15],[5.5,17.9],[-4.5,-1]];
   for(const[x,y]of spots)for(let k=0;k<3;k++){const X=x+(R()-.5)*1.6,Y=y+(R()-.5)*1.6,zz=H(X,Y);sph(X,Y,zz+.25,.32+R()*.25,shrubM[(((k+Math.floor(x))%3)+3)%3],9,1+R()*.4,1+R()*.4,.8+R()*.5,1);}
   {const R2=rng(41);let n=0;
    for(let k=0;k<6000&&n<260;k++){const X=-4.5+R2()*21,Y=-4.2+R2()*21;
