@@ -62,7 +62,6 @@ kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:0 5px;font:11px I
 #mapbtn{display:none}
 #compass{position:fixed;right:calc(14px + env(safe-area-inset-right));top:calc(14px + env(safe-area-inset-top));width:92px;height:92px;border-radius:50%;padding:0;z-index:3;cursor:pointer;-webkit-tap-highlight-color:transparent}
 #compass svg{display:block;width:100%;height:100%}
-#compass #crose{transform-origin:50px 50px;will-change:transform}
 #compass:hover{border-color:var(--acc)}
 @media (pointer:coarse){
   .seg button{padding:11px 6px;font-size:13px}
@@ -188,20 +187,19 @@ kbd{background:rgba(255,255,255,.12);border-radius:4px;padding:0 5px;font:11px I
 
 <div id="hud" class="panel"><b id="hudroom">—</b><small id="hudinfo"></small></div>
 <div id="cross"></div>
-<div id="compass" class="panel" title="Boussole : cliquer pour se tourner vers le Nord"><svg viewBox="0 0 100 100" aria-label="Boussole">
- <g id="crose">
-  <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(201,187,166,.45)" stroke-width="1"/>
-  <g stroke="rgba(201,187,166,.7)" stroke-width="1.2">
-   <line x1="50" y1="7" x2="50" y2="13"/><line x1="50" y1="87" x2="50" y2="93"/><line x1="7" y1="50" x2="13" y2="50"/><line x1="87" y1="50" x2="93" y2="50"/>
-   <line x1="19.6" y1="19.6" x2="22.4" y2="22.4"/><line x1="80.4" y1="19.6" x2="77.6" y2="22.4"/><line x1="19.6" y1="80.4" x2="22.4" y2="77.6"/><line x1="80.4" y1="80.4" x2="77.6" y2="77.6"/>
-  </g>
-  <polygon points="50,16 56,50 50,46 44,50" fill="#d8452a"/><polygon points="50,84 56,50 50,54 44,50" fill="#c9bba6"/>
-  <circle cx="50" cy="50" r="3.2" fill="#15110d" stroke="#c9bba6" stroke-width="1"/>
-  <g font-family="Inter,sans-serif" font-weight="600" font-size="11" text-anchor="middle" fill="#c9bba6">
-   <text x="50" y="27" fill="#d8452a" font-size="12">N</text><text x="50" y="82">S</text><text x="79" y="54">E</text><text x="21" y="54">O</text>
-  </g>
+<div id="compass" class="panel" title="Boussole : l'aiguille indique la direction regardée ; cliquer pour se tourner vers le Nord"><svg viewBox="0 0 100 100" aria-label="Boussole">
+ <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(201,187,166,.45)" stroke-width="1"/>
+ <g stroke="rgba(201,187,166,.7)" stroke-width="1.2">
+  <line x1="50" y1="7" x2="50" y2="12"/><line x1="50" y1="88" x2="50" y2="93"/><line x1="7" y1="50" x2="12" y2="50"/><line x1="88" y1="50" x2="93" y2="50"/>
+  <line x1="19.6" y1="19.6" x2="22.4" y2="22.4"/><line x1="80.4" y1="19.6" x2="77.6" y2="22.4"/><line x1="19.6" y1="80.4" x2="22.4" y2="77.6"/><line x1="80.4" y1="80.4" x2="77.6" y2="77.6"/>
  </g>
- <polygon points="50,1.5 54,8 46,8" fill="#e0a861"/>
+ <g font-family="Inter,sans-serif" font-weight="600" font-size="11" text-anchor="middle" fill="#c9bba6">
+  <text x="50" y="24" fill="#d8452a" font-size="12">N</text><text x="50" y="85">S</text><text x="82" y="54">E</text><text x="18" y="54">O</text>
+ </g>
+ <g id="cneedle" transform="rotate(0 50 50)">
+  <polygon points="50,20 55.5,50 50,46 44.5,50" fill="#e0a861"/><polygon points="50,80 55.5,50 50,54 44.5,50" fill="rgba(201,187,166,.55)"/>
+ </g>
+ <circle cx="50" cy="50" r="3.2" fill="#15110d" stroke="#c9bba6" stroke-width="1"/>
 </svg></div>
 <div id="mapbox" class="panel"><canvas id="map" width="420" height="420"></canvas><div id="maplab">Plan</div></div>
 
@@ -2320,12 +2318,12 @@ function updateHUD(){
    BOUCLE
    ===================================================================== */
 /* ---------------- boussole : suit la caméra (maquette et visite) ; clic = se tourner vers le Nord ---------------- */
-// repère local : X orienté à 125° (vers le SE), Y à 35° (vers le NE) — même rotation que le plan de situation
-const crose=$('#crose');let compassH=1e9;
+// aiguille = azimut de la direction regardée sur un cadran fixe ; repère local : X orienté à 125° (vers le SE), Y à 35° (vers le NE) — même rotation que le plan de situation
+const cneedle=$('#cneedle');let compassH=1e9;
 function viewHeading(){const d=new THREE.Vector3();camera.getWorldDirection(d);let fx=d.x,fy=-d.z;
   if(Math.hypot(fx,fy)<.05){const u=new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion);fx=u.x;fy=-u.z;}   // vue zénithale : haut de l'écran
   return Math.atan2(fx*c35+fy*s35,fy*c35-fx*s35);}                                                                  // azimut (rad, sens horaire depuis le Nord)
-function updateCompass(){const h=viewHeading()*180/Math.PI;if(Math.abs(h-compassH)<.05)return;compassH=h;crose.setAttribute('transform','rotate('+(-h).toFixed(2)+' 50 50)');}
+function updateCompass(){const h=viewHeading()*180/Math.PI;if(Math.abs(h-compassH)<.05)return;compassH=h;cneedle.setAttribute('transform','rotate('+h.toFixed(2)+' 50 50)');}   // cadran fixe (N en haut), seule l'aiguille tourne vers la direction regardée
 $('#compass').addEventListener('click',()=>{const h=viewHeading();
   if(MODE==='walk'){player.yaw=35*Math.PI/180;return;}
   tween=null;const o=camera.position.clone().sub(controls.target);o.applyAxisAngle(new THREE.Vector3(0,1,0),h);camera.position.copy(controls.target).add(o);controls.update();});
