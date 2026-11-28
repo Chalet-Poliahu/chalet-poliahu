@@ -465,8 +465,104 @@ const T={
   leather:tex(cnv(512,(g,S)=>drawSpeckle(g,S,{c:[24,52,36],n:7000,v:14,r:2.5,seed:13})),.8),
 };
 T.grass.colorSpace=THREE.NoColorSpace;
-mat('larchExt',{map:T.larchExt,roughness:.9});
-mat('larchExtH',{map:T.larchExtH,roughness:.9});
+/* ---------------- bardage mélèze étuvé, pose verticale jointive, lames de 22 cm (façades) ----------------
+   Textures PBR générées à l'échelle réelle (couleur, normale, rugosité) : 4 lames-sources de 0,22 × 3,52 m,
+   bois de printemps #9c6946, bois d'été #6a4128, nœuds #3b2314. Le shader tire pour chaque lame une source,
+   un décalage et une rotation de 180° aléatoires et une variation de teinte de ±8 %, puis applique le vieillissement
+   à 2 ans : grisé #a09387 (rugosité 0,86) en zone exposée, #976340 sous le débord de toit de 1,20 m avec une
+   transition irrégulière entre 0,36 et 1,74 m sous le haut du bardage (2,46 → 3,84 m pour un bardage de 0,90 à 4,20 m),
+   et rejaillissement plus sombre sur les 35 cm du bas. */
+const LARCH=(()=>{const W=LIGHT?256:512,H=W*4,BW=W/4,pxm=BW/.22,R=rng(2027);
+  const E=[0x9c,0x69,0x46],La=[0x6a,0x41,0x28],K=[0x3b,0x23,0x14];
+  const col=new Uint8ClampedArray(W*H*4),hgt=new Float32Array(W*H),rgh=new Uint8ClampedArray(W*H*4);
+  const sp=LIGHT?.009:.0065;                                                         // pas des cernes (m)
+  for(let b=0;b<4;b++){const flat=b%2===0,cx=.04+R()*.14,k=18+R()*14,a=.012+R()*.01,p1=R()*6,p2=R()*6,
+      knots=[];for(let q=0,nk=1+Math.floor(R()*2.2);q<nk;q++)knots.push([.03+R()*.16,.2+R()*3.1,.006+R()*.011]);
+    for(let y=0;y<H;y++){const ym=y/pxm;
+      for(let xx=0;xx<BW;xx++){const lx=(xx+.5)/pxm,i=y*W+b*BW+xx;
+        let f=flat?(lx-cx)*(lx-cx)*k*(1+.25*Math.sin(ym*.9+p1))-ym*a+.002*Math.sin(ym*9+p2)
+                  :lx+.006*Math.sin(ym*1.7+p1)+.002*Math.sin(ym*8.3+p2);
+        let kn=0;for(const[kx,ky,kr]of knots){const dx=lx-kx,dy=(ym-ky)*.55,d=Math.hypot(dx,dy);if(d<kr*3.2){f+=.012*Math.exp(-d*d/(kr*kr*2.5))*Math.sign(dx||1);}kn=Math.max(kn,1-smooth(kr*.75,kr*1.05,d));}
+        const ph=((f/sp)%1+1)%1,lw=smooth(.58,.8,ph)*(1-smooth(.86,.98,ph));            // bande de bois d'été
+        const nz=(vnoise(lx*60,ym*2.5)-.5)*.045;
+        for(let c=0;c<3;c++){let v=E[c]+(La[c]-E[c])*lw*.9;v*=1+nz;v=v+(K[c]-v)*kn;col[i*4+c]=v;}col[i*4+3]=255;
+        hgt[i]=lw*.7+kn*.35+nz*.4;const r=255*(.9-lw*.12+nz*.3-kn*.2);rgh[i*4]=rgh[i*4+1]=rgh[i*4+2]=r;rgh[i*4+3]=255;}}}
+  const mk=(data,srgb)=>{const c=document.createElement('canvas');c.width=W;c.height=H;c.getContext('2d').putImageData(new ImageData(data,W,H),0,0);return c;};
+  const cc=mk(col,true);{const g=cc.getContext('2d');g.globalCompositeOperation='overlay';g.globalAlpha=.18;for(let b=0;b<4;b++)for(let q=0;q<4;q++)g.drawImage(GRAIN.fine,(b*97+q*61)%360,0,150,512,b*BW,q*H/4,BW,H/4);}  // fibres (photo CC0)
+  const nrm=new Uint8ClampedArray(W*H*4),st=LIGHT?1.4:2.0;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,xl=(x%BW),hL=hgt[y*W+(xl>0?x-1:x)],hR=hgt[y*W+(xl<BW-1?x+1:x)],hU=hgt[((y-1+H)%H)*W+x],hD=hgt[((y+1)%H)*W+x];
+    let nx=(hL-hR)*st,ny=(hD-hU)*st,nz=1,l=Math.hypot(nx,ny,nz);nrm[i*4]=(nx/l*.5+.5)*255;nrm[i*4+1]=(ny/l*.5+.5)*255;nrm[i*4+2]=(nz/l*.5+.5)*255;nrm[i*4+3]=255;}
+  const T3=(c,srgb)=>{const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=ANISO;if(srgb)t.colorSpace=THREE.SRGBColorSpace;return t;};
+  let sr=0,sg=0,sb=0;{const d=cc.getContext('2d').getImageData(0,0,W,H).data;for(let i=0;i<d.length;i+=4*7){sr+=d[i];sg+=d[i+1];sb+=d[i+2];}const n=d.length/(4*7);sr/=n*255;sg/=n*255;sb/=n*255;}
+  const mean=new THREE.Color().setRGB(sr,sg,sb,THREE.SRGBColorSpace);
+  return{map:T3(cc,true),normal:T3(mk(nrm)),rough:T3(mk(rgh)),mean,lum:.2126*mean.r+.7152*mean.g+.0722*mean.b};})();
+// carte d'abri : vue zénithale orthographique du chalet (toits, débords, balcons) codant la hauteur du dessus (y + 50)
+const COVERU={uCover:{value:null},uCoverXf:{value:new THREE.Vector4(10,-8,34,30)}};
+function bakeCover(){const xf=COVERU.uCoverXf.value,N=LIGHT?256:512;
+  const rt=new THREE.WebGLRenderTarget(N,N,{type:THREE.HalfFloatType,format:THREE.RGBAFormat,minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter});
+  const cam=new THREE.OrthographicCamera(-xf.z/2,xf.z/2,xf.w/2,-xf.w/2,1,400);cam.up.set(0,0,-1);cam.position.set(xf.x,200,xf.y);cam.lookAt(xf.x,0,xf.y);
+  cam.layers.set(5);const vis=[];for(const m of LEVEL_MESHES){m.layers.enable(5);vis.push(m.visible);m.visible=true;}
+  const om=new THREE.ShaderMaterial({vertexShader:'varying float vY;void main(){vec4 w=modelMatrix*vec4(position,1.);vY=w.y;gl_Position=projectionMatrix*viewMatrix*w;}',
+    fragmentShader:'varying float vY;void main(){gl_FragColor=vec4(vY+50.,0.,0.,1.);}',side:THREE.DoubleSide});
+  const ov=scene.overrideMaterial,bg=scene.background,fog=scene.fog;scene.overrideMaterial=om;scene.background=null;scene.fog=null;
+  const cc=new THREE.Color();renderer.getClearColor(cc);const ca=renderer.getClearAlpha();renderer.setClearColor(0x000000,0);
+  renderer.setRenderTarget(rt);renderer.clear();renderer.render(scene,cam);renderer.setRenderTarget(null);
+  renderer.setClearColor(cc,ca);scene.overrideMaterial=ov;scene.background=bg;scene.fog=fog;
+  LEVEL_MESHES.forEach((m,i)=>{m.visible=vis[i];m.layers.disable(5);});
+  COVERU.uCover.value=rt.texture;}
+function cladMat(name,horiz){
+  const m=mat(name,{map:LARCH.map,normalMap:LARCH.normal,roughnessMap:LARCH.rough,normalScale:new THREE.Vector2(.7,.7),roughness:1});
+  m.userData.weather=true;
+  m.customProgramCacheKey=()=>'clad'+(horiz?'H':'V');
+  m.onBeforeCompile=sh=>{
+    sh.uniforms.uCover=COVERU.uCover;sh.uniforms.uCoverXf=COVERU.uCoverXf;
+    Object.assign(sh.uniforms,{uShel:{value:new THREE.Color('#976340')},uExp:{value:new THREE.Color('#a09387')},uMean:{value:LARCH.mean},uLum:{value:LARCH.lum}});
+    sh.vertexShader='attribute vec2 aWeather;\nvarying vec2 vWeather;\nvarying vec3 vWPos;\nvarying vec3 vNw;\n'+sh.vertexShader.replace('#include <project_vertex>','#include <project_vertex>\n vWeather=aWeather; vWPos=(modelMatrix*vec4(transformed,1.0)).xyz; vNw=normalize(mat3(modelMatrix)*objectNormal);');
+    sh.fragmentShader=(horiz?'#define BOARD_H\n':'')+`uniform vec3 uShel;uniform vec3 uExp;uniform vec3 uMean;uniform float uLum;
+varying vec2 vWeather;varying vec3 vWPos;varying vec3 vNw;uniform sampler2D uCover;uniform vec4 uCoverXf;
+float cl_h(float n){return fract(sin(n)*43758.5453123);}
+float cl_n(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);float n=i.x+i.y*57.+i.z*113.;
+  return mix(mix(mix(cl_h(n),cl_h(n+1.),f.x),mix(cl_h(n+57.),cl_h(n+58.),f.x),f.y),mix(mix(cl_h(n+113.),cl_h(n+114.),f.x),mix(cl_h(n+170.),cl_h(n+171.),f.x),f.y),f.z);}
+`+sh.fragmentShader
+      .replace('#include <map_fragment>',`
+  vec2 U=vMapUv;
+  #ifdef BOARD_H
+   U=U.yx;
+  #endif
+  const float BW=.22;
+  float bi=floor(U.x/BW),lx=fract(U.x/BW);
+  float h1=cl_h(bi*1.37+.11),h2=cl_h(bi*2.71+.33),h3=cl_h(bi*5.19+.77),h4=cl_h(bi*9.43+.5);
+  float bFl=step(.5,h2);                                                     // rotation de 180° de la lame
+  vec2 bUV=vec2((floor(h3*4.)+mix(lx,1.-lx,bFl))*.25,(U.y+h1*17.3)/3.52*(1.-2.*bFl));
+  vec2 bSc=vec2(.25/BW,1./3.52);vec2 gX=dFdx(U)*bSc,gY=dFdy(U)*bSc;         // gradients continus : pas de couture de mip aux joints
+  vec3 tex=textureGrad(map,bUV,gX,gY).rgb*(1.+(h4-.5)*.16);                 // teinte ±8 % par lame
+  float ed=min(lx,1.-lx)*BW;tex*=mix(.5,1.,smoothstep(.0006,.0022,ed));      // joint de lames jointives
+  float nn=cl_n(vec3(vWPos.x*1.7,vWPos.y*2.3,vWPos.z*1.7))*.6+cl_n(vec3(vWPos.x*5.,vWPos.y*7.,vWPos.z*5.))*.4;
+  // abri : on cherche vers l'extérieur ce qui couvre le point (toit, débord, balcon) ; rapport hauteur sous l'abri / avancée
+  // du débord : 0,30 → 1,45 (débord de 1,20 m : transition de 0,36 à 1,74 m sous l'abri, soit 2,46 → 3,84 m sur ce bardage)
+  vec2 nh=vNw.xz;nh=dot(nh,nh)>1e-4?normalize(nh):vec2(0.);float rr=9.;
+  for(int k=0;k<7;k++){float D=.3+float(k)*.42;vec2 q=vWPos.xz+nh*D;vec2 cu=vec2((q.x-uCoverXf.x)/uCoverXf.z+.5,(uCoverXf.y-q.y)/uCoverXf.w+.5);
+    float c=texture2D(uCover,cu).r-50.;if(c>vWPos.y+.05&&all(greaterThan(cu,vec2(0.)))&&all(lessThan(cu,vec2(1.))))rr=min(rr,(c-vWPos.y)/D);}
+  float S=1.-smoothstep(.3,1.45,rr+(nn-.5)*.4);                              // 1 = abrité
+  S=max(S,smoothstep(-.3,-.7,vNw.y));                                        // sous-faces (débords, dessous de balcon) : abritées
+  float lumT=dot(tex,vec3(.2126,.7152,.0722));
+  vec3 shel=tex*(uShel/uMean),expo=uExp*mix(1.,lumT/uLum,.5)*(1.+(tex-uMean)*.1);
+  vec3 wcol=mix(expo,shel,S);
+  float spl=1.-smoothstep(0.,.35,vWeather.y+(nn-.5)*.12);wcol*=1.-.32*spl;    // rejaillissement en pied
+  float wExp=1.-S;
+  diffuseColor.rgb*=wcol;`)
+      .replace('#include <roughnessmap_fragment>',`float roughnessFactor=clamp(mix(.66,.86,wExp)*(.85+.25*textureGrad(roughnessMap,bUV,gX,gY).g)+.05*spl,0.,1.);`)
+      .replace('#include <normal_fragment_maps>',`
+  vec3 mapN=textureGrad(normalMap,bUV,gX,gY).xyz*2.-1.;
+  if(bFl>.5)mapN.xy=-mapN.xy;
+  #ifdef BOARD_H
+   mapN.xy=mapN.yx;
+  #endif
+  mapN.xy*=normalScale*mix(1.,1.35,wExp);                                     // le bois exposé se creuse (fibres en relief)
+  normal=normalize(tbn*mapN);`);
+  };
+  return m;}
+cladMat('larchExt',false);cladMat('larchExtH',true);
 mat('larchInt',{map:T.larchInt,roughness:.75});
 mat('ceil',{map:T.ceil,roughness:.8});
 mat('oldWood',{map:T.oldWood,roughness:.92});
@@ -515,6 +611,10 @@ mat('augOr',{color:0xc9a050,metalness:.85,roughness:.45,emissive:0x8a5a14,emissi
 {// chêne massif naturel de l'enfilade (photo IMG_9452) : fil horizontal sans joints, trois nuances miel des lamelles
  T.oakSb=tex(cnv(512,(g,S)=>{g.fillStyle=hsl(37,38,84);g.fillRect(0,0,S,S);g.save();g.globalCompositeOperation='overlay';g.globalAlpha=.85;g.drawImage(GRAIN.fineH,0,0,S,S);g.restore();}),.7);
  mat('sbFrame',{map:T.oakSb,color:0xf0dcba,roughness:.55});mat('sbA',{map:T.oakSb,color:0xfbebcc,roughness:.55});mat('sbB',{map:T.oakSb,color:0xf3dfbb,roughness:.55});mat('sbC',{map:T.oakSb,color:0xe9d1a8,roughness:.55});}
+{// coulure sous appui de fenêtre : traînée sombre irrégulière, plus marquée en haut
+ const c=cnv(64,(g,S)=>{const R=rng(5);for(let x=0;x<S;x++){const w=Math.exp(-Math.pow((x-S/2)/(S*.22),2));for(let y=0;y<S;y++){const a=w*Math.pow(1-y/S,1.4)*(.6+.4*R());g.fillStyle=`rgba(52,40,30,${(a*.55).toFixed(3)})`;g.fillRect(x,y,1,1);}}});
+ const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;
+ const m=new THREE.MeshStandardMaterial({map:t,transparent:true,depthWrite:false,roughness:.9,polygonOffset:true,polygonOffsetFactor:-2});m.name='drip';MAT.drip=m;}
 mat('beech',{map:T.oak,color:0xf0dcc4,roughness:.55});
 mat('redCord',{color:0xb3241c,roughness:.8});
 mat('chromeWire',{color:0xd8d8d8,metalness:1,roughness:.25,wireframe:true});
@@ -604,7 +704,7 @@ mat('granite2',{map:T.concrete,color:0x9d9c98,roughness:.75});
 mat('membrane',{color:0x1b1b1c,roughness:.85,side:THREE.DoubleSide});
 
 // relief des matériaux (veinage et joints du bois, grain de l'enduit) : la texture de couleur sert aussi de carte de relief
-for(const[k,sc]of[['larchExt',1.2],['larchExtH',1.2],['larchInt',.6],['ceil',.6],['oldWood',1.4],['oak',.5],['oakRaw',.5],['oldOak',1],['parquet',.5],['deck',1],['beam',1],['shutter',1],['plaster',1.5],['enduit',1.5]]){const m=MAT[k];if(m&&m.map){m.bumpMap=m.map;m.bumpScale=sc;}}
+for(const[k,sc]of[['larchInt',.6],['ceil',.6],['oldWood',1.4],['oak',.5],['oakRaw',.5],['oldOak',1],['parquet',.5],['deck',1],['beam',1],['shutter',1],['plaster',1.5],['enduit',1.5]]){const m=MAT[k];if(m&&m.map){m.bumpMap=m.map;m.bumpScale=sc;}}
 
 /* ---------------- collecte des géométries (fusionnées à la fin) ---------------- */
 const parts=[];
@@ -675,7 +775,9 @@ function wall(o){
   for(const op of o.ops||[]){const pp=opPoly(op,floor,topF,P);if(!pp)continue;ops.push(Object.assign({},op,pp));
     const h=new THREE.Path();pp.pts.forEach((q,i)=>i?h.lineTo(q[0],q[1]):h.moveTo(q[0],q[1]));shape.holes.push(h);}
   const M4=wallMatrix(ux,uy,ax,ay);
-  const extr=(depth,e0,m)=>{const g=new THREE.ExtrudeGeometry(shape,{depth,bevelEnabled:false,curveSegments:1,steps:1});g.translate(0,0,e0);g.applyMatrix4(M4);addGeo(g,m,o.lv);};
+  const extr=(depth,e0,m)=>{const g=new THREE.ExtrudeGeometry(shape,{depth,bevelEnabled:false,curveSegments:1,steps:1});g.translate(0,0,e0);
+    if(m.userData.weather){const p=g.attributes.position,aw=new Float32Array(p.count*2);for(let i=0;i<p.count;i++){const sx=clamp(p.getX(i),SA,SB),zz=p.getY(i);aw[i*2]=Math.max(0,topF(sx)-zz);aw[i*2+1]=Math.max(0,zz-botF(sx));}g.setAttribute('aWeather',new THREE.BufferAttribute(aw,2));} // distance sous le haut du bardage / au-dessus du pied
+    g.applyMatrix4(M4);addGeo(g,m,o.lv);};
   extr(t,-t/2,o.int||MAT.plaster);
   if(o.ext)extr(.025,t/2,o.ext);
   if(o.int2)extr(.02,-t/2-.02,o.int2);
@@ -692,7 +794,8 @@ function wall(o){
       frame(s0,s1,zb,zt,ec);
       if(w>1.05)wb((s0+s1)/2-.035,(s0+s1)/2+.035,zb,zt,ec-.04,ec+.04,MAT.larchInt);
       wb(s0+.05,s1-.05,zb+.05,zt-.05,ec-.006,ec+.006,MAT.glass);
-      if(o.ext){wb(s0-.04,s1+.04,zb-.05,zb,t/2-.04,t/2+.07,MAT.larchExt);}
+      if(o.ext){wb(s0-.04,s1+.04,zb-.05,zb,t/2-.04,t/2+.07,MAT.larchExt);
+        if(o.ext.userData.weather)for(const sx of[s0-.025,s1+.025]){const L2=.35+Math.random()*.25,g=new THREE.PlaneGeometry(.07,L2);g.translate(sx,zb-.05-L2/2,t/2+.0262);g.applyMatrix4(M4);addGeo(g,MAT.drip,o.lv,{cast:false});}} // coulures sous les extrémités d'appui
       if(op.shut1&&o.ext){const[a,b]=op.shut1>0?[s1+.02,s1+w+.02]:[s0-w-.02,s0-.02];        // volet à un seul vantail
         wb(a,b,zb,zt,t/2+.03,t/2+.065,MAT.larchExt);wb(a,b,zb+.15,zb+.25,t/2+.065,t/2+.09,MAT.larchExt);wb(a,b,zt-.25,zt-.15,t/2+.065,t/2+.09,MAT.larchExt);}
       if(op.shut&&o.ext){for(const [a,b] of [[s0-w/2-.02,s0-.02],[s1+.02,s1+w/2+.02]]){
@@ -2014,7 +2117,9 @@ function finalize(){
     const key=p.mat.uuid+'|'+p.lv+'|'+(p.cast?1:0);
     if(!groups.has(key))groups.set(key,{mat:p.mat,lv:p.lv,cast:p.cast,geos:[]});
     let g=p.geo;if(g.index)g=g.toNonIndexed();
-    for(const k of Object.keys(g.attributes))if(!['position','normal','uv'].includes(k))g.deleteAttribute(k);
+    const keep=p.mat.userData.weather?['position','normal','uv','aWeather']:['position','normal','uv'];
+    for(const k of Object.keys(g.attributes))if(!keep.includes(k))g.deleteAttribute(k);
+    if(p.mat.userData.weather&&!g.attributes.aWeather){const a=new Float32Array(g.attributes.position.count*2).fill(9);g.setAttribute('aWeather',new THREE.BufferAttribute(a,2));} // pièces isolées : exposées
     if(!g.attributes.uv)g.setAttribute('uv',new THREE.BufferAttribute(new Float32Array(g.attributes.position.count*2),2));
     if(!g.attributes.normal)g.computeVertexNormals();
     g.clearGroups();groups.get(key).geos.push(g);});
@@ -2355,7 +2460,7 @@ addEventListener('resize',onResize);addEventListener('orientationchange',()=>set
 setTimeout(async()=>{
   try{
     try{const b=atob(GEO.lc.rle),N=GEO.lc.n*GEO.lc.n;LC=new Uint8Array(N);let k=0;for(let i=0;i+2<b.length;i+=3){const v=b.charCodeAt(i),c=b.charCodeAt(i+1)|(b.charCodeAt(i+2)<<8);LC.fill(v,k,Math.min(N,k+c));k+=c;}}catch(e){console.warn(e);LC=null;} // occupation du sol (décodage direct, compatible Safari en local)
-    buildTerrain();buildHouse();decorate();buildDhommee();buildSite();finalize();buildVillage();buildParcel();buildLights();buildStars();
+    buildTerrain();buildHouse();decorate();buildDhommee();buildSite();finalize();bakeCover();buildVillage();buildParcel();buildLights();buildStars();
     camera.position.copy(L3(...VIEWS.sw.p));controls.target.copy(L3(...VIEWS.sw.t));
     player.yaw=Math.atan2(1,-.35);
     updateSun();applyCut(3);controls.update();
