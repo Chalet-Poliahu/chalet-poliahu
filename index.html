@@ -421,8 +421,9 @@ const WS=(LIGHT||TABLET)?512:1024;                                              
 const T={
   larchExt:tex(cnv(WS,(g,S)=>drawBoards(g,S,{meters:1.85,widths:[.2,.17],base:[38,40,62],vary:9,seed:3,knots:true,ends:true,gap:'rgba(70,48,22,.55)'})),1.85),
   larchExtH:tex(cnv(WS,(g,S)=>drawBoards(g,S,{meters:1.85,widths:[.2,.17],base:[37,40,60],vary:9,seed:4,knots:true,horizontal:true,gap:'rgba(70,48,22,.55)'})),1.85),
-  larchInt:tex(cnv(WS,(g,S)=>drawBoards(g,S,{meters:1.56,widths:[.12,.14],base:[36,32,68],vary:9,seed:5,knots:true,ends:true,gapw:.004})),1.56),
-  ceil:tex(cnv(WS,(g,S)=>drawBoards(g,S,{meters:1.56,widths:[.12,.14],base:[35,30,66],vary:8,seed:15,knots:true,gapw:.005,horizontal:true})),1.56),
+  // lambris et plafonds : mélèze vapo en lames larges de 16 à 22 cm, ton miel nuancé (chalet Le Roc, Empreinte n°5)
+  larchInt:tex(cnv(WS,(g,S)=>drawBoards(g,S,{meters:2,widths:[.18,.22,.16,.2],base:[33,40,63],vary:11,seed:5,knots:true,ends:true,gapw:.004,gap:'rgba(80,50,25,.45)'})),2),
+  ceil:tex(cnv(WS,(g,S)=>drawBoards(g,S,{meters:2,widths:[.18,.2,.16],base:[34,38,66],vary:9,seed:15,knots:true,gapw:.005,gap:'rgba(80,50,25,.4)',horizontal:true})),2),
   oldWood:tex(cnv(WS,(g,S)=>drawBoards(g,S,{grain:'old',meters:1.6,widths:[.18,.22,.14,.26],base:[27,22,34],vary:16,seed:8,knots:true,ends:true,gap:'rgba(15,10,6,.8)',gapw:.01})),1.6),
   deck:tex(cnv(WS,(g,S)=>drawBoards(g,S,{meters:1.44,widths:[.14,.14],base:[30,38,52],vary:10,seed:12,ends:true,horizontal:true,gapw:.012,gap:'rgba(20,12,6,.85)'})),1.44),
   parquet:tex(cnv(WS,(g,S)=>drawParquet(g,S,{meters:2,row:.2,base:[36,36,67],vary:7,seed:4})),2),
@@ -465,15 +466,15 @@ const T={
   leather:tex(cnv(512,(g,S)=>drawSpeckle(g,S,{c:[24,52,36],n:7000,v:14,r:2.5,seed:13})),.8),
 };
 T.grass.colorSpace=THREE.NoColorSpace;
-/* ---------------- bardage mélèze étuvé, pose verticale jointive, lames de 22 cm (façades) ----------------
+/* ---------------- bardage mélèze raboté naturel, pose verticale jointive, lames de 22 cm (façades) ----------------
    Textures PBR générées à l'échelle réelle (couleur, normale, rugosité) : 4 lames-sources de 0,22 × 3,52 m,
-   bois de printemps #9c6946, bois d'été #6a4128, nœuds #3b2314. Le shader tire pour chaque lame une source,
+   bois de printemps #d69a65, bois d'été #9f5a31, nœuds #56301a (rugosité 0,62). Le shader tire pour chaque lame une source,
    un décalage et une rotation de 180° aléatoires et une variation de teinte de ±8 %, puis applique le vieillissement
-   à 2 ans : grisé #a09387 (rugosité 0,86) en zone exposée, #976340 sous le débord de toit de 1,20 m avec une
+   à 6 mois : grisé à 32 % #c29572 (rugosité 0,72) en zone exposée, #cb8c57 sous le débord de toit de 1,20 m avec une
    transition irrégulière entre 0,36 et 1,74 m sous le haut du bardage (2,46 → 3,84 m pour un bardage de 0,90 à 4,20 m),
    et rejaillissement plus sombre sur les 35 cm du bas. */
 const LARCH=(()=>{const W=LIGHT?256:512,H=W*4,BW=W/4,pxm=BW/.22,R=rng(2027);
-  const E=[0x9c,0x69,0x46],La=[0x6a,0x41,0x28],K=[0x3b,0x23,0x14];
+  const E=[0xd6,0x9a,0x65],La=[0x9f,0x5a,0x31],K=[0x56,0x30,0x1a];
   const col=new Uint8ClampedArray(W*H*4),hgt=new Float32Array(W*H),rgh=new Uint8ClampedArray(W*H*4);
   const sp=LIGHT?.009:.0065;                                                         // pas des cernes (m)
   for(let b=0;b<4;b++){const flat=b%2===0,cx=.04+R()*.14,k=18+R()*14,a=.012+R()*.01,p1=R()*6,p2=R()*6,
@@ -489,7 +490,7 @@ const LARCH=(()=>{const W=LIGHT?256:512,H=W*4,BW=W/4,pxm=BW/.22,R=rng(2027);
         hgt[i]=lw*.7+kn*.35+nz*.4;const r=255*(.9-lw*.12+nz*.3-kn*.2);rgh[i*4]=rgh[i*4+1]=rgh[i*4+2]=r;rgh[i*4+3]=255;}}}
   const mk=(data,srgb)=>{const c=document.createElement('canvas');c.width=W;c.height=H;c.getContext('2d').putImageData(new ImageData(data,W,H),0,0);return c;};
   const cc=mk(col,true);{const g=cc.getContext('2d');g.globalCompositeOperation='overlay';g.globalAlpha=.18;for(let b=0;b<4;b++)for(let q=0;q<4;q++)g.drawImage(GRAIN.fine,(b*97+q*61)%360,0,150,512,b*BW,q*H/4,BW,H/4);}  // fibres (photo CC0)
-  const nrm=new Uint8ClampedArray(W*H*4),st=LIGHT?1.4:2.0;
+  const nrm=new Uint8ClampedArray(W*H*4),st=LIGHT?.9:1.25;   // raboté : relief faible
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,xl=(x%BW),hL=hgt[y*W+(xl>0?x-1:x)],hR=hgt[y*W+(xl<BW-1?x+1:x)],hU=hgt[((y-1+H)%H)*W+x],hD=hgt[((y+1)%H)*W+x];
     let nx=(hL-hR)*st,ny=(hD-hU)*st,nz=1,l=Math.hypot(nx,ny,nz);nrm[i*4]=(nx/l*.5+.5)*255;nrm[i*4+1]=(ny/l*.5+.5)*255;nrm[i*4+2]=(nz/l*.5+.5)*255;nrm[i*4+3]=255;}
   const T3=(c,srgb)=>{const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=ANISO;if(srgb)t.colorSpace=THREE.SRGBColorSpace;return t;};
@@ -516,7 +517,7 @@ function cladMat(name,horiz){
   m.customProgramCacheKey=()=>'clad'+(horiz?'H':'V');
   m.onBeforeCompile=sh=>{
     sh.uniforms.uCover=COVERU.uCover;sh.uniforms.uCoverXf=COVERU.uCoverXf;
-    Object.assign(sh.uniforms,{uShel:{value:new THREE.Color('#976340')},uExp:{value:new THREE.Color('#a09387')},uMean:{value:LARCH.mean},uLum:{value:LARCH.lum}});
+    Object.assign(sh.uniforms,{uShel:{value:new THREE.Color('#cb8c57')},uExp:{value:new THREE.Color('#c29572')},uMean:{value:LARCH.mean},uLum:{value:LARCH.lum}});
     sh.vertexShader='attribute vec2 aWeather;\nvarying vec2 vWeather;\nvarying vec3 vWPos;\nvarying vec3 vNw;\n'+sh.vertexShader.replace('#include <project_vertex>','#include <project_vertex>\n vWeather=aWeather; vWPos=(modelMatrix*vec4(transformed,1.0)).xyz; vNw=normalize(mat3(modelMatrix)*objectNormal);');
     sh.fragmentShader=(horiz?'#define BOARD_H\n':'')+`uniform vec3 uShel;uniform vec3 uExp;uniform vec3 uMean;uniform float uLum;
 varying vec2 vWeather;varying vec3 vWPos;varying vec3 vNw;uniform sampler2D uCover;uniform vec4 uCoverXf;
@@ -546,19 +547,19 @@ float cl_n(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);float n=i.x+i.y*57
   float S=1.-smoothstep(.3,1.45,rr+(nn-.5)*.4);                              // 1 = abrité
   S=max(S,smoothstep(-.3,-.7,vNw.y));                                        // sous-faces (débords, dessous de balcon) : abritées
   float lumT=dot(tex,vec3(.2126,.7152,.0722));
-  vec3 shel=tex*(uShel/uMean),expo=uExp*mix(1.,lumT/uLum,.5)*(1.+(tex-uMean)*.1);
+  vec3 shel=tex*(uShel/uMean),expo=mix(tex*(uExp/uMean),uExp*(lumT/uLum),.32);   // grisé à 32 % : le veinage reste lisible
   vec3 wcol=mix(expo,shel,S);
-  float spl=1.-smoothstep(0.,.35,vWeather.y+(nn-.5)*.12);wcol*=1.-.32*spl;    // rejaillissement en pied
+  float spl=1.-smoothstep(0.,.35,vWeather.y+(nn-.5)*.12);wcol*=1.-.22*spl;    // rejaillissement en pied
   float wExp=1.-S;
   diffuseColor.rgb*=wcol;`)
-      .replace('#include <roughnessmap_fragment>',`float roughnessFactor=clamp(mix(.66,.86,wExp)*(.85+.25*textureGrad(roughnessMap,bUV,gX,gY).g)+.05*spl,0.,1.);`)
+      .replace('#include <roughnessmap_fragment>',`float roughnessFactor=clamp(mix(.62,.72,wExp)*(.85+.25*textureGrad(roughnessMap,bUV,gX,gY).g)+.05*spl,0.,1.);`)
       .replace('#include <normal_fragment_maps>',`
   vec3 mapN=textureGrad(normalMap,bUV,gX,gY).xyz*2.-1.;
   if(bFl>.5)mapN.xy=-mapN.xy;
   #ifdef BOARD_H
    mapN.xy=mapN.yx;
   #endif
-  mapN.xy*=normalScale*mix(1.,1.35,wExp);                                     // le bois exposé se creuse (fibres en relief)
+  mapN.xy*=normalScale*mix(1.,1.12,wExp);                                     // à 6 mois les fibres se relèvent à peine
   normal=normalize(tbn*mapN);`);
   };
   return m;}
@@ -624,7 +625,7 @@ mat('photo',{map:T.skiphoto,roughness:.6});
 mat('linenC',{color:0xd9cfbf,roughness:1,side:THREE.DoubleSide});
 mat('graniteG',{map:T.concrete,color:0xa9a9a6,roughness:.7});
 mat('oakDark',{color:0x3a2c1f,roughness:.8});
-mat('beam',{map:T.larchExtH,color:0xd9b38a,roughness:.85});
+mat('beam',{map:T.larchExtH,color:0xd2b394,roughness:.8});   // charpente miel (moins saturée, comme Le Roc)
 mat('deck',{map:T.deck,roughness:.9});
 {// parquet : photo « Bois » fournie (chêne huilé à lames larges, ~2,5 m de côté), pour tous les parquets de tous les étages
  const t=new THREE.TextureLoader().load('data:image/jpeg;base64,'+document.getElementById('parquetPhoto').textContent.trim());t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;t.repeat.set(1/2.2,1/2.2);t.anisotropy=ANISO;
